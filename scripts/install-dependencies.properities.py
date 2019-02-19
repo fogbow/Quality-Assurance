@@ -22,14 +22,22 @@ for line in content:
     
     dependency, target = line.split('=')
 
-    if target == '':
+    if target == None or target == '':
         target = 'develop'
-    
     
     project = dependency.split("/")[-1].split(".")[0]
     repository = re.search("[^/]+(?=\.git)", dependency).group(0)
     
+    print "> git clone \"%s\" into \"%s\"" % (dependency, project)
     os.system("git clone " + dependency)
+
+    print "> cd %s" % repository
     os.chdir(repository)
+
+    print "> git checkout " + target
     os.system("git checkout " + target)
+
+    print os.getcwd()
+
+    print "> mvn install"
     os.system("mvn install")
