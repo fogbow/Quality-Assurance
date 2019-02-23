@@ -1,24 +1,20 @@
 import requests
 
-from common import TestSuite
+from ..common import TestSuite
 
 __all__ = ['AuthTest']
 
 class AuthTest(TestSuite):
 
-    test_number = 0
+	def __init__(self):
+		super(TestSuite, self).__init__()
+		
+	@classmethod
+	def run(self):
+		self.logTest("jhkjhkh")
 
-    def __init__(self):
-        self.test_auth()
+	def test_auth(self):
+		print("hjkh")
 
-    def test_auth(self):
-        super().logTest("Success get token")
-        # self.getToken()
-
-    # def getToken(self):
-    #     payload = {
-    #         'username': 
-    #     }
-    #     requests.get
-    
-    
+if __name__ == "__main__" :
+	AuthTest.run()

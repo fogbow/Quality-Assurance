@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ['TestSuite']
 
-class TestSuite:
+class TestSuite(object):
 
     test_number = 0
 
