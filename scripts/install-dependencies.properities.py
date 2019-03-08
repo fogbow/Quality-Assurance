@@ -17,12 +17,18 @@ with open(sys.argv[1]) as f:
 
 
 for line in content:
-
-    os.chdir('..')
     
     dependency, target = line.split('=')
+    if dependency == None or dependency == '':
+        continue
+    
+    os.chdir('..')
 
     if target == None or target == '':
+        target = 'develop'
+
+    TRAVIS_BRANCH = os.environ.get("TRAVIS_BRANCH")
+    if TRAVIS_BRANCH == 'develop':
         target = 'develop'
     
     project = dependency.split("/")[-1].split(".")[0]
