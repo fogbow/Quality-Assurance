@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.NullPointerException
+  at cloud.fogbow.cli.Main.printToConsole(Main.java:192)
+  at cloud.fogbow.cli.Main.main(Main.java:120)
