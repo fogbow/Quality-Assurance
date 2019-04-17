@@ -1,47 +1,71 @@
 # -*- coding: utf-8 -*-
 
+import json
 import requests
 
+from collections import namedtuple
+from os import path
 from . import HttpMethods
 
-class TestFactory(object):
-    def __init__(self, service_url):
-        self.test = TestInstance(url=url)
+__all__ = ['TestEngine']
 
-class RasInstance:
-    def __init__(self, url):
-        self.url = url
-        self.headers = {}
+class TestEngine(object):
+    def __init__(self, service_url):
+        self.last_create = None
+        self.service_url = service_url;
         self.body = {}
-        self.waits = []
-        self.instanceid = None
-        self.last
-        self.method = HttpMethods.GET
+        self.headers = {}
+
+    def wait_until_ready(self, tries = -1):
+        if tries == 0:
+            return None
+        lasturl = str(self.last_create.url)
+        last_create = json.loads(self.last_create)
+        instance_id = last_create['id']
+        url = lasturl + '/' + instance_id
+        response_json = requests.get(url=url, headers=headers).json()
+        response = json.loads(response_json)
+
+        if response['state'] == InstanceState.READY:
+            ret = response
+        else:
+            ret = self.wait_until_ready(tries-1)
+
+        return ret
+
+    def create(self, resource, **kwargs):
+        available_endpoints = {
+            'token': '/tokens'
+        }
+
+        urlpath = available_endpoints[resource]
+        url = self.service_url + '/' + urlpath
+
+        headers = kwargs.get('headers', self.headers)
+        body    = kwargs.get('body', self.body)
+
+        req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.POST))
+        self.last_create = req.build()
+
+        return json.loads(self.last_create.text)
 
     def addHeader(self, header, headervalue):
         self.headers[header] = headervalue
-        return self
 
-    def addBodyField(self, field, value):
-        self.body[field] = value
-        return self
-
-    def setBody(self, newBody):
-        self.body = newBody
-        return self
-
-    def addWaitCondition(self, condition, tries = -1):
-        self.waits.append((condition, tries))
-        return self
-
-    def setMethod(self, method):
+class FogbowRequest:
+    def __init__(self, url, method = 'get', body = {}, headers = {}):
+        self.url = url
+        self.headers = headers
+        self.body = body
         self.method = method
-        return self
 
-    def do_request(self):
+    def build(self):
         verb_requester = getattr(requests, self.method)
-        return verb_requester(url=url, json=body, headers=headers)
+        return verb_requester(url=self.url, json=self.body, headers=self.headers)
 
-class WaitConditions:
-    def ready(self, instance):
-        return instance['state'] == InstanceState.READY
+class Response:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
+# class WaitConditions:
+#     def ready(self, instance):
+#         return instance['state'] == InstanceState.READY

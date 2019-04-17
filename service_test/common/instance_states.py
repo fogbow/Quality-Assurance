@@ -5,7 +5,7 @@ __all__ = ['InstanceState']
 
 class InstanceState(Enum):
     DISPATCHED = auto()
-    READY = auto()
+    READY = "READY"
     CREATING = auto()
     UNAVAILABLE = auto()
     FAILED = auto()
