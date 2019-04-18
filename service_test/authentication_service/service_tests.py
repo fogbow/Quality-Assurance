@@ -31,9 +31,8 @@ class AuthTest(TestSuite):
         self.setpid(pid)
 
     def teardown(self):
-        print('tasketeeee')
-        # self.kill_background_process(self.pid)
-        # shutil.rmtree(self.workdir)
+        self.kill_background_process(self.pid)
+        shutil.rmtree(self.workdir)
 
     def run(self):
         self.createtoken()
@@ -52,4 +51,4 @@ class AuthTest(TestSuite):
 
     @classmethod
     def required_resources(self):
-        return ['auth_credentials']
+        return ['auth_credentials', 'invalid_auth_credentials']

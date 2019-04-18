@@ -36,13 +36,10 @@ if __name__ == "__main__":
 
     print('###### Starting tests ######')
 
-    a = ServiceTest(service_under_test, configuration, service_resources)
-    # tests = list(filter(lambda x: x[0] != '_', dir(a)))
-    # for t in tests:
-    #     if not hasattr(TestSuite, t):
-    #         getattr(a, t).__call__()
-    a.setup()
-    a.run()
-    a.teardown()
+    servicetest = ServiceTest(service_under_test, configuration, service_resources)
+    servicetest.asserteq()
+    # servicetest.setup()
+    # servicetest.run()
+    # servicetest.teardown()
 
     print('###### Tests are over ######')

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import operator
 import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import time
 import uuid
@@ -34,16 +34,16 @@ class TestSuite(object):
         return cls.test_number
 
     def setup(self, pid):
-        self.__nope__('setup')
+        raise NotImplementedError
 
     def run(self):
-        self.__nope__('run')
+        raise NotImplementedError
 
     def teardown(self):
-        self.__nope__('teardown')
+        raise NotImplementedError
 
-    def __nope__(self, phase):
-        print('Not Implemented %s method' % phase)
+    @classmethod
+    def required_resources(self):
         raise NotImplementedError
 
     def goto_workdir(self):
@@ -101,10 +101,19 @@ class TestSuite(object):
 
         content = Utils.file_get_contents(temp_file_name)
         if not content:
-                time.sleep(1)
-                return self.getpidbyport(port)
+            time.sleep(1)
+            return self.getpidbyport(port)
         return content
 
     def kill_background_process(self, pid):
         command = "kill -KILL %s " % pid
         os.system(command)
+
+    def __getattribute__(self, assertion):
+        comparation_functions = ['eq', 'ne', 'lt', 'le', 'gt', 'ge']
+        assertstr = 'assert'
+        print('eeeeeeeeooooooooooooo', assertion)
+        for cmp in comparation_functions:
+            if(assertion == assertstr+cmp):
+                return Assertion(cmp)
+        raise AttributeError

@@ -45,7 +45,7 @@ class TestEngine(object):
         body    = kwargs.get('body', self.body)
 
         req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.POST))
-        self.last_create = req.build()
+        self.last_create = req.execute()
 
         return json.loads(self.last_create.text)
 
@@ -59,13 +59,6 @@ class FogbowRequest:
         self.body = body
         self.method = method
 
-    def build(self):
+    def execute(self):
         verb_requester = getattr(requests, self.method)
         return verb_requester(url=self.url, json=self.body, headers=self.headers)
-
-class Response:
-    def __init__(self, **entries):
-        self.__dict__.update(entries)
-# class WaitConditions:
-#     def ready(self, instance):
-#         return instance['state'] == InstanceState.READY
