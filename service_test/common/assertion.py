@@ -10,12 +10,12 @@ class Assertion(object):
     def __call__(self, obtained, expected=None):
         print("Run to the hills", obtained, expected)
 
-        assertresult = self.compare(obtained, expected) if expected \
+        assertpassed = self.compare(obtained, expected) if expected \
             else self.compare(obtained)
 
-        if assertresult:
-            self.suite.assertion_ok()
+        if assertpassed:
+            self.suite.__assertion_ok__()
         else:
-            self.suite.assertion_fail()
+            self.suite.__assertion_fail__()
 
     

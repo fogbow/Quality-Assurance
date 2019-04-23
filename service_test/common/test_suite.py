@@ -26,10 +26,22 @@ class TestSuite(object):
         self.service_instance = {}
         self.assert_count = 0
         self.assert_succ = 0
+        self.failed_tests = []
+        self.tests_info = {}
 
     @classmethod
-    def logTest(cls, msg):
-        print("-- Test {}: {}".format(cls.nexttextcase(), msg))
+    def starttest(cls, msg):
+        testid = cls.nexttextcase()
+        self.tests_info[testid] = msg
+        print("-- Test {}: {}".format(testid, msg))
+
+    @classmethod
+    def endtest(cls, msg):
+        if self.assert_count > 0:
+            if self.assert_count != self.assert_succ:
+                self.failed_tests.append(self.test_number)
+            self.assert_count = 0
+            self.assert_succ = 0
 
     @classmethod
     def nexttextcase(cls):
@@ -112,6 +124,12 @@ class TestSuite(object):
         command = "kill -KILL %s " % pid
         os.system(command)
 
+    def __getattribute__(self, attribute):
+        func = object.__getattribute__(self, attribute)
+        if not self.__issystemtestfunction__(attribute):
+            return fun
+        
+
     def __getattr__(self, attribute):
         comparation_functions = ['eq', 'ne', 'lt', 'le', 'gt', 'ge']
         assertstr = 'assert'
@@ -121,10 +139,17 @@ class TestSuite(object):
             
         raise AttributeError
 
-    def assertion_ok(self):
+    def __assertion_ok__(self):
         self.assert_count += 1
         self.assert_succ += 1
 
-    def assertion_fail(self):
+    def __assertion_fail__(self):
         self.assert_count += 1
 
+    def __issystemtestfunction__(self, name):
+        suite_functions = ['setup', 'run', 'teardown', 'required_resources']
+        
+        if name[0] == '_' or name in suite_functions:
+            return False
+        else:
+            return True
