@@ -124,12 +124,6 @@ class TestSuite(object):
         command = "kill -KILL %s " % pid
         os.system(command)
 
-    def __getattribute__(self, attribute):
-        func = object.__getattribute__(self, attribute)
-        if not self.__issystemtestfunction__(attribute):
-            return fun
-        
-
     def __getattr__(self, attribute):
         comparation_functions = ['eq', 'ne', 'lt', 'le', 'gt', 'ge']
         assertstr = 'assert'
