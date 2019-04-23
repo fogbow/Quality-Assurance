@@ -37,9 +37,10 @@ if __name__ == "__main__":
     print('###### Starting tests ######')
 
     servicetest = ServiceTest(service_under_test, configuration, service_resources)
-    servicetest.asserteq()
-    # servicetest.setup()
-    # servicetest.run()
-    # servicetest.teardown()
+    servicetest.asserttrue(True)
+    servicetest.asserteq(1,2)
+    servicetest.setup()
+    servicetest.run()
+    servicetest.teardown()
 
     print('###### Tests are over ######')

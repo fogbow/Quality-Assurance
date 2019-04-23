@@ -118,10 +118,6 @@ class TestSuite(object):
         for cmp in comparation_functions:
             if(attribute == assertstr+cmp):
                 return Assertion(self, getattr(operator, cmp))
-        
-        truestr = 'true'
-        if attribute == assertstr+truestr:
-            return Assertion(self, lambda value: value == True)
             
         raise AttributeError
 
