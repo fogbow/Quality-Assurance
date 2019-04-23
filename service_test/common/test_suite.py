@@ -11,6 +11,7 @@ import uuid
 
 from .constants import CommonConstants
 from .utils import Utils
+from .assertion import Assertion
 
 __all__ = ['TestSuite']
 
@@ -23,6 +24,8 @@ class TestSuite(object):
         self.service = service
         self.service_dir = os.getcwd() + '/' + service
         self.service_instance = {}
+        self.assert_count = 0
+        self.assert_succ = 0
 
     @classmethod
     def logTest(cls, msg):
@@ -109,11 +112,23 @@ class TestSuite(object):
         command = "kill -KILL %s " % pid
         os.system(command)
 
-    def __getattribute__(self, assertion):
+    def __getattr__(self, attribute):
         comparation_functions = ['eq', 'ne', 'lt', 'le', 'gt', 'ge']
         assertstr = 'assert'
-        print('eeeeeeeeooooooooooooo', assertion)
         for cmp in comparation_functions:
-            if(assertion == assertstr+cmp):
-                return Assertion(cmp)
+            if(attribute == assertstr+cmp):
+                return Assertion(self, getattr(operator, cmp))
+        
+        truestr = 'true'
+        if attribute == assertstr+truestr:
+            return Assertion(self, lambda value: value == True)
+            
         raise AttributeError
+
+    def assertion_ok(self):
+        self.assert_count += 1
+        self.assert_succ += 1
+
+    def assertion_fail(self):
+        self.assert_count += 1
+
