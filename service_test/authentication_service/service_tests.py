@@ -36,16 +36,35 @@ class AuthTest(TestSuite):
         shutil.rmtree(self.workdir)
 
     def run(self):
-        self.createtoken()
+        try:
+            self.createtoken()
+            self.failcreatetoken()
+        except Exception as e:
+            self.fail()
+            print("Interruped execution due to runtime error")
+            raise e
+        finally:
+            self.logresults()
 
     def createtoken(self):
-        self.logTest('Creating token')
+        self.__createtokentest__('Creating token', \
+            self.resources['auth_credentials'], \
+            self.assertlt)
+
+    def failcreatetoken(self):
+        self.__createtokentest__('Fail attemp to creating token', \
+            self.resources['invalid_auth_credentials'], \
+            self.assertge)
+
+    def __createtokentest__ (self, message, credentials, assertion):
+        self.starttest(message)
+
         test = TestEngine(self.origin)
-        credentials = self.resources['auth_credentials']
         res = test.create('token', body=credentials)
-        token = res['token']
-        print('Token %s was obtained' % token)
-        # body = json.lao
+        
+        assertion(res.status_code, 400)
+        
+        self.endtest()
 
     def setpid(self, pid):
         self.pid = pid

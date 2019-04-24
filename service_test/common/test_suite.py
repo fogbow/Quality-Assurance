@@ -19,29 +19,45 @@ class TestSuite(object):
 
     test_number = 0
     workdir = tempfile.mkdtemp()
+    failed_tests = []
+    tests_info = {}
+    assert_count = 0
+    assert_succ = 0
 
     def __init__(self, service):
         self.service = service
         self.service_dir = os.getcwd() + '/' + service
-        self.service_instance = {}
-        self.assert_count = 0
-        self.assert_succ = 0
-        self.failed_tests = []
-        self.tests_info = {}
-
+        
     @classmethod
     def starttest(cls, msg):
         testid = cls.nexttextcase()
-        self.tests_info[testid] = msg
+        cls.tests_info[testid] = msg
         print("-- Test {}: {}".format(testid, msg))
 
     @classmethod
-    def endtest(cls, msg):
-        if self.assert_count > 0:
-            if self.assert_count != self.assert_succ:
-                self.failed_tests.append(self.test_number)
-            self.assert_count = 0
-            self.assert_succ = 0
+    def endtest(cls):
+        if cls.assert_count > 0:
+            if cls.assert_count != cls.assert_succ:
+                cls.failed_tests.append(cls.test_number)
+            cls.assert_count = 0
+            cls.assert_succ = 0
+
+    @classmethod
+    def fail(cls):
+        cls.assert_count += 1
+        cls.assert_succ = 0
+        cls.endtest()
+
+    @classmethod
+    def logresults(cls):
+        print("%d tests were run" % cls.test_number)
+        print("%d tests passed" % (cls.test_number - len(cls.failed_tests)))
+        print("%d tests failed" % len(cls.failed_tests))
+        
+        if cls.failed_tests:
+            print("\n\n-- Failed tests --\n\n")
+            for test in cls.failed_tests:
+                print("%d -- %s" % (test, cls.tests_info[test]))
 
     @classmethod
     def nexttextcase(cls):
@@ -109,7 +125,10 @@ class TestSuite(object):
         return self.getpidbyport(port)
 
     """ Use this with care """
-    def getpidbyport(self, port):
+    def getpidbyport(self, port, ttl=20):
+        if ttl == 0:
+            return ''
+
         temp_file_name = str(uuid.uuid4())
         with open(temp_file_name, 'w') as file:
             subprocess.call("lsof -t -i:%s" % port, shell=True, stdout=file)
@@ -117,7 +136,7 @@ class TestSuite(object):
         content = Utils.file_get_contents(temp_file_name)
         if not content:
             time.sleep(1)
-            return self.getpidbyport(port)
+            return self.getpidbyport(port, ttl-1)
         return content
 
     def kill_background_process(self, pid):
@@ -129,21 +148,15 @@ class TestSuite(object):
         assertstr = 'assert'
         for cmp in comparation_functions:
             if(attribute == assertstr+cmp):
-                return Assertion(self, getattr(operator, cmp))
+                return Assertion(TestSuite, getattr(operator, cmp))
             
         raise AttributeError
 
+    @classmethod
     def __assertion_ok__(self):
         self.assert_count += 1
         self.assert_succ += 1
 
+    @classmethod
     def __assertion_fail__(self):
         self.assert_count += 1
-
-    def __issystemtestfunction__(self, name):
-        suite_functions = ['setup', 'run', 'teardown', 'required_resources']
-        
-        if name[0] == '_' or name in suite_functions:
-            return False
-        else:
-            return True

@@ -47,7 +47,7 @@ class TestEngine(object):
         req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.POST))
         self.last_create = req.execute()
 
-        return json.loads(self.last_create.text)
+        return self.last_create
 
     def addHeader(self, header, headervalue):
         self.headers[header] = headervalue
