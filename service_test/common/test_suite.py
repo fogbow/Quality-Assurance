@@ -107,10 +107,6 @@ class TestSuite(object):
 
         print('Configuration files source is "%s" and target is "%s"' % (source, target))
 
-        # It's important to remove any noise from destination folder
-        shutil.rmtree(target)
-        shutil.copytree(source, target)
-
     def run_in_background(self, command, port):
         print("service dir is %s" % self.service_dir)
         print("Workdir is %s" % os.getcwd())
