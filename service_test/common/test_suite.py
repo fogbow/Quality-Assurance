@@ -90,6 +90,17 @@ class TestSuite(object):
         repository = re.search("[^/]+(?=\.git)", url).group(0)
         return repository
 
+    def install_dependencies(self):
+        # TODO: Fix this setup
+        dep_propr_path = CommonConstants.resource_path + \
+            CommonConstants.dependencies_properties
+        
+        script = CommonConstants.install_dependencies_script
+        
+        command = '{} {}'.format(script, dep_propr_path)
+        
+        os.system(command)
+
     def clonerepo(self, url, branch = "master"):
         repository = self.download_repo(url, branch)
 
@@ -97,6 +108,7 @@ class TestSuite(object):
         os.chdir(self.workdir)
 
         self.reponame = repository
+        # self.install_dependencies()
 
         return self.workdir
 
