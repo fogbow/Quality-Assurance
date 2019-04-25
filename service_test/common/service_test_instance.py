@@ -24,10 +24,15 @@ class ServiceTestInstance(object):
     assert_count = 0
     assert_succ = 0
 
-    def __init__(self, service):
+    def __init__(self, service, configuration, resources):
+        self.conf = configuration
         self.service = service
         self.service_dir = os.getcwd() + '/' + service
-        
+        self.pid = None
+        self.resources = resources
+        self.port = self.conf['application']['port']
+        self.origin = 'http://localhost:' + str(self.port)
+
     @classmethod
     def starttest(cls, msg):
         testid = cls.nexttextcase()
@@ -45,7 +50,7 @@ class ServiceTestInstance(object):
     @classmethod
     def fail(cls):
         cls.assert_count += 1
-        cls.assert_succ = 0
+        # cls.assert_succ = 0
         cls.endtest()
 
     @classmethod
@@ -64,18 +69,33 @@ class ServiceTestInstance(object):
         cls.test_number += 1
         return cls.test_number
 
-    def setup(self, pid):
-        raise NotImplementedError
-
     def run(self):
-        raise NotImplementedError
-
-    def teardown(self):
         raise NotImplementedError
 
     @classmethod
     def required_resources(self):
         raise NotImplementedError
+    
+    def setup(self):
+        repo_url = self.conf['application']['repo_url']
+        branch = self.conf['application']['branch_under_test']
+
+        self.clonerepo(repo_url, branch)
+
+        command = self.conf['commands']['run_application']
+        port = self.port
+
+        pid = self.run_in_background(command, port)
+        if not pid:
+            print('Could not start the service. Exiting...')
+            exit(-1)
+
+        print("pid for proccess is %s" % pid)
+        self.pid = pid
+
+    def teardown(self):
+        self.kill_background_process(self.pid)
+        shutil.rmtree(self.workdir)
 
     def goto_workdir(self):
         if os.path.exists(self.workdir):
@@ -86,20 +106,18 @@ class ServiceTestInstance(object):
     def download_repo(self, url, branch):
         self.goto_workdir()
 
-        os.system("git clone --single-branch --branch %s %s " % (branch, url))
+        self.__runcommand__("git clone --single-branch --branch %s %s " % (branch, url))
         repository = re.search("[^/]+(?=\.git)", url).group(0)
         return repository
 
     def install_dependencies(self):
-        # TODO: Fix this setup
         dep_propr_path = self.workdir + '/' + CommonConstants.resource_path + \
             CommonConstants.dependencies_properties
         
         script = CommonConstants.install_dependencies_script.format(self.service_dir)
         
         command = '{} {}'.format(script, dep_propr_path)
-        print("command", command)
-        os.system(command)
+        self.__runcommand__(command)
         os.chdir(self.workdir)
 
     def clonerepo(self, url, branch = "master"):
@@ -120,12 +138,14 @@ class ServiceTestInstance(object):
         print('Configuration files source is "%s" and target is "%s"' % (source, target))
 
         # It's important to remove any noise from destination folder
-        shutil.rmtree(target)
+        if os.path.exists(target):
+            shutil.rmtree(target)
+        
         shutil.copytree(source, target)
 
     def run_in_background(self, command, port):
         self.install_dependencies()
-        print("service dir is %s" % self.service_dir)
+        print("Service dir is %s" % self.service_dir)
         print("Workdir is %s" % os.getcwd())
         self.copy_conf_files()
 
@@ -154,7 +174,7 @@ class ServiceTestInstance(object):
 
     def kill_background_process(self, pid):
         command = "kill -KILL %s " % pid
-        os.system(command)
+        self.__runcommand__(command)
 
     def __getattr__(self, attribute):
         comparation_functions = ['eq', 'ne', 'lt', 'le', 'gt', 'ge']
@@ -173,3 +193,7 @@ class ServiceTestInstance(object):
     @classmethod
     def __assertion_fail__(self):
         self.assert_count += 1
+
+    def __runcommand__(self, command):
+        print('\n>', command)
+        os.system(command)

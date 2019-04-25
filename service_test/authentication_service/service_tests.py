@@ -3,40 +3,18 @@
 import requests
 import shutil
 
-from common import ServiceTestInstance, TestEngine
+from common import TestEngine, VersionandPublicKeyCheck
 
 __all__ = ['AuthTest']
 
-class AuthTest(ServiceTestInstance):
+class AuthTest(VersionandPublicKeyCheck):
 
     def __init__(self, service, configuration, resources):
-        ServiceTestInstance.__init__(self, service)
-        self.conf = configuration
-        self.pid = None
-        self.resources = resources
-        self.port = self.conf['application']['port']
-        self.origin = 'http://localhost:' + str(self.port)
-
-    def setup(self):
-        repo_url = self.conf['application']['repo_url']
-        branch = self.conf['application']['branch_under_test']
-
-        self.clonerepo(repo_url, branch)
-
-        command = self.conf['commands']['run_application']
-        port = self.port
-
-        pid = self.run_in_background(command, port)
-
-        print("pid for proccess is %s" % pid)
-        self.setpid(pid)
-
-    def teardown(self):
-        self.kill_background_process(self.pid)
-        shutil.rmtree(self.workdir)
+        super().__init__(service, configuration, resources)
 
     def run(self):
         try:
+            super().run()
             self.createtoken()
             self.failcreatetoken()
         except Exception as e:
@@ -52,7 +30,7 @@ class AuthTest(ServiceTestInstance):
             self.assertlt)
 
     def failcreatetoken(self):
-        self.__createtokentest__('Fail attemp to creating token', \
+        self.__createtokentest__('Fail attemp to create token', \
             self.resources['invalid_auth_credentials'], \
             self.assertge)
 
@@ -65,9 +43,6 @@ class AuthTest(ServiceTestInstance):
         assertion(res.status_code, 400)
         
         self.endtest()
-
-    def setpid(self, pid):
-        self.pid = pid
 
     @classmethod
     def required_resources(self):

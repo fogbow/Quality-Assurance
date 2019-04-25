@@ -3,7 +3,7 @@
 import json
 import sys
 from authentication_service import AuthTest
-from collections import namedtuple
+from membership_service import MembersTest
 from common import *
 from os import path
 
@@ -21,7 +21,8 @@ def getresources(service_resources,required_resources):
 if __name__ == "__main__":
 
     services = {
-        'authentication_service': AuthTest
+        'authentication_service': AuthTest,
+        'membership_service': MembersTest
     }
 
     resources_path = 'test_resources'

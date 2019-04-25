@@ -48,6 +48,23 @@ class TestEngine(object):
 
         return self.last_create
 
+    def get(self, resource, **kwargs):
+        available_endpoints = {
+            'members': '/members',
+            'public-key': '/publicKey',
+            'version': '/version'
+        }
+
+        urlpath = available_endpoints[resource]
+        url = self.service_url + '/' + urlpath
+
+        headers = kwargs.get('headers', self.headers)
+        body    = kwargs.get('body', self.body)
+
+        req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.GET))
+        
+        return req.execute()
+
     def addHeader(self, header, headervalue):
         self.headers[header] = headervalue
 
