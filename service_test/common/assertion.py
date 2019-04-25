@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Util class for TestSuite """
+""" Util class for ServiceTestInstance """
 class Assertion(object):
 
     def __init__(self, suite, compare):

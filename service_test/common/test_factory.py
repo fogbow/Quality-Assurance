@@ -3,7 +3,6 @@
 import json
 import requests
 
-from collections import namedtuple
 from os import path
 from . import HttpMethods
 

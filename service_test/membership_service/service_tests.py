@@ -71,4 +71,4 @@ class AuthTest(ServiceTestInstance):
 
     @classmethod
     def required_resources(self):
-        return ['auth_credentials', 'invalid_auth_credentials']
+        return []

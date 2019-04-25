@@ -13,9 +13,9 @@ from .constants import CommonConstants
 from .utils import Utils
 from .assertion import Assertion
 
-__all__ = ['TestSuite']
+__all__ = ['ServiceTestInstance']
 
-class TestSuite(object):
+class ServiceTestInstance(object):
 
     test_number = 0
     workdir = tempfile.mkdtemp()
@@ -92,14 +92,15 @@ class TestSuite(object):
 
     def install_dependencies(self):
         # TODO: Fix this setup
-        dep_propr_path = CommonConstants.resource_path + \
+        dep_propr_path = self.workdir + '/' + CommonConstants.resource_path + \
             CommonConstants.dependencies_properties
         
-        script = CommonConstants.install_dependencies_script
+        script = CommonConstants.install_dependencies_script.format(self.service_dir)
         
         command = '{} {}'.format(script, dep_propr_path)
-        
+        print("command", command)
         os.system(command)
+        os.chdir(self.workdir)
 
     def clonerepo(self, url, branch = "master"):
         repository = self.download_repo(url, branch)
@@ -108,8 +109,7 @@ class TestSuite(object):
         os.chdir(self.workdir)
 
         self.reponame = repository
-        # self.install_dependencies()
-
+        
         return self.workdir
 
     def copy_conf_files(self):
@@ -119,7 +119,12 @@ class TestSuite(object):
 
         print('Configuration files source is "%s" and target is "%s"' % (source, target))
 
+        # It's important to remove any noise from destination folder
+        shutil.rmtree(target)
+        shutil.copytree(source, target)
+
     def run_in_background(self, command, port):
+        self.install_dependencies()
         print("service dir is %s" % self.service_dir)
         print("Workdir is %s" % os.getcwd())
         self.copy_conf_files()
@@ -134,7 +139,7 @@ class TestSuite(object):
 
     """ Use this with care """
     def getpidbyport(self, port, ttl=20):
-        if ttl == 0:
+        if ttl <= 0:
             return ''
 
         temp_file_name = str(uuid.uuid4())
@@ -156,7 +161,7 @@ class TestSuite(object):
         assertstr = 'assert'
         for cmp in comparation_functions:
             if(attribute == assertstr+cmp):
-                return Assertion(TestSuite, getattr(operator, cmp))
+                return Assertion(ServiceTestInstance, getattr(operator, cmp))
             
         raise AttributeError
 
