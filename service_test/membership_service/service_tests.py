@@ -2,6 +2,7 @@
 
 import requests
 import shutil
+import re
 
 from common import TestEngine, VersionCheck
 
@@ -29,7 +30,10 @@ class MembersTest(VersionCheck):
         test = TestEngine(self.origin)
         res = test.get('members').json()
         members = res['members']
+        
         self.asserteq(type(members), list)
+        self.assertge(len(members), 1)
+        
         self.endtest()
 
     @classmethod
