@@ -36,6 +36,8 @@ class ServiceTestInstance(object):
     @classmethod
     def starttest(cls, msg):
         testid = cls.nexttextcase()
+        cls.assert_count = 0
+        cls.assert_succ = 0
         cls.tests_info[testid] = msg
         print("-- Test {}: {}".format(testid, msg))
 
@@ -44,13 +46,10 @@ class ServiceTestInstance(object):
         if cls.assert_count > 0:
             if cls.assert_count != cls.assert_succ:
                 cls.failed_tests.append(cls.test_number)
-            cls.assert_count = 0
-            cls.assert_succ = 0
 
     @classmethod
     def fail(cls):
         cls.assert_count += 1
-        # cls.assert_succ = 0
         cls.endtest()
 
     @classmethod
@@ -158,7 +157,7 @@ class ServiceTestInstance(object):
         return self.getpidbyport(port)
 
     """ Use this with care """
-    def getpidbyport(self, port, ttl=20):
+    def getpidbyport(self, port, ttl=50):
         if ttl <= 0:
             return ''
 

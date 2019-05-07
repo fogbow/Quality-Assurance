@@ -8,8 +8,10 @@ class Assertion(object):
         self.suite = suite
 
     def __call__(self, obtained, expected=None):
-        assertpassed = self.compare(obtained, expected) if expected != None \
-            else self.compare(obtained)
+        if expected != None:
+            assertpassed = self.compare(obtained,expected)
+        else:
+            assertpassed = self.compare(obtained)
 
         if assertpassed:
             self.suite.__assertion_ok__()

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from common import TestEngine, VersionCheck
+from common import TestEngine, VersionandPublicKeyCheck
 
-__all__ = ['MembersTest']
+__all__ = ['RASTest']
 
-class MembersTest(VersionCheck):
+class RASTest(VersionandPublicKeyCheck):
 
     def __init__(self, service, configuration, resources):
         super().__init__(service, configuration, resources)
@@ -12,25 +12,12 @@ class MembersTest(VersionCheck):
     def run(self):
         try:
             super().run()
-            self.listmembers()
         except Exception as e:
             self.fail()
             print("Interruped execution due to runtime error")
             raise e
         finally:
             self.logresults()
-
-    def listmembers(self):
-        self.starttest('List members')
-        
-        test = TestEngine(self.origin)
-        res = test.get('members').json()
-        members = res['members']
-        
-        self.asserteq(type(members), list)
-        self.assertge(len(members), 1)
-        
-        self.endtest()
 
     @classmethod
     def required_resources(self):

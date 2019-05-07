@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import requests
-import shutil
-
 from common import TestEngine, VersionandPublicKeyCheck
 
 __all__ = ['AuthTest']
