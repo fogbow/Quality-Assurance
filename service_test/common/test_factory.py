@@ -5,6 +5,7 @@ import requests
 
 from os import path
 from . import HttpMethods
+from . import ResourceStore
 
 __all__ = ['TestEngine']
 
@@ -15,7 +16,7 @@ class TestEngine(object):
         self.body = {}
         self.headers = {}
 
-    def wait_until_ready(self, tries = -1):
+    def wait_until_ready(self, tries = 50):
         if tries == 0:
             return None
         lasturl = str(self.last_create.url)
@@ -46,6 +47,11 @@ class TestEngine(object):
         req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.POST))
         self.last_create = req.execute()
 
+        if self.last_create.status_code < 400 and resource == 'token':
+            token = self.last_create.json().get('token', None)
+            self.addHeader('Fogbow-User-Token', token)
+
+
         return self.last_create
 
     def get(self, resource, **kwargs):
@@ -66,7 +72,13 @@ class TestEngine(object):
         return req.execute()
 
     def addHeader(self, header, headervalue):
-        self.headers[header] = headervalue
+        if header and headervalue:
+            print('Setting default header "{}" to "{}"'.format(header, headervalue))
+            self.headers[header] = headervalue
+        else:
+            print("Ignoring header setting. One or more parameters were empty.")
+            print("Header: {}".format(header))
+            print("Header content: {}".format(headervalue))
 
 class FogbowRequest:
     def __init__(self, url, method = 'get', body = {}, headers = {}):

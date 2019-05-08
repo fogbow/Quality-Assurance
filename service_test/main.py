@@ -8,7 +8,9 @@ from membership_service import MembersTest
 from resource_allocation_service import RASTest
 from common import *
 
-def getresources(service_resources,required_resources):
+resources_path = 'test_resources'
+
+def getresources(service_resources ,required_resources):
     resources = {}
     jsonsuffix = '.json'
 
@@ -19,31 +21,62 @@ def getresources(service_resources,required_resources):
 
     return resources
 
-if __name__ == "__main__":
+def getserviceconf(servicename):
+    test_config_path = os.path.join(resources_path, servicename, 'service_test_conf.json')
+    return Utils.load_json(test_config_path)
 
-    curdir = os.getcwd()
-
+def getservice(servicename):
     services = {
         'authentication_service': AuthTest,
         'membership_service': MembersTest,
         'resource_allocation_service': RASTest
     }
+    
+    ServiceTest = services[servicename]
 
-    resources_path = 'test_resources'
-    service_under_test = sys.argv[1]
-    ServiceTest = services[service_under_test]
+    configuration = getserviceconf(servicename)
 
-    test_config_path = os.path.join(resources_path, service_under_test, 'service_test_conf.json')
-    configuration = Utils.load_json(test_config_path)
-
-    service_resources_path = os.path.join(resources_path, service_under_test)
+    service_resources_path = os.path.join(resources_path, servicename)
     service_resources = getresources(service_resources_path, ServiceTest.required_resources())
+
+    return ServiceTest(servicename, configuration, service_resources)
+
+if __name__ == "__main__":
+
+    curdir = os.getcwd()
+
+    service_under_test = sys.argv[1]
+
+    servicetest = getservice(service_under_test)
+    conf = getserviceconf(service_under_test)
+    dependencies_services = []
+
+    # start dependencies services
+    for servicename in conf['services']:
+        serviceinstance = getservice(servicename)
+        serviceinstance.setup()
+
+        print(servicename, serviceinstance)
+        
+        dependencies_services.append(serviceinstance)
+        
+        # those setups may change current dir
+        os.chdir(curdir)
 
     print('###### Starting tests ######')
 
-    servicetest = ServiceTest(service_under_test, configuration, service_resources)
     servicetest.setup()
     servicetest.run()
-    servicetest.teardown()
 
     print('###### Tests are over ######')
+    print('######  Tearing down  ######')
+
+    servicetest.teardown()
+    
+    for serviceinstance in dependencies_services:
+        serviceinstance.teardown()
+        
+        # these teardowns may change current dir
+        os.chdir(curdir)
+
+    print('######  Done  ######')

@@ -17,5 +17,6 @@ class Assertion(object):
             self.suite.__assertion_ok__()
         else:
             self.suite.__assertion_fail__()
-
+            
+        return assertpassed
     

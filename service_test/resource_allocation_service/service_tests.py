@@ -19,6 +19,21 @@ class RASTest(VersionandPublicKeyCheck):
         finally:
             self.logresults()
 
+    def getimages(self):
+        pass
+
+    def createnetwork(self):
+        pass
+
+    def createcompute(self):
+        pass
+
+    def createvolume(self):
+        pass
+
+    def createattachment(self):
+        pass
+
     @classmethod
     def required_resources(self):
         return []
