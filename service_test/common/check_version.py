@@ -7,9 +7,6 @@ __all__ = ['VersionCheck']
 
 class VersionCheck(ServiceTestInstance):
 
-    def __init__(self, service, configuration, resources):
-        return super().__init__(service, configuration, resources)
-
     def run(self):
         self.version()
 

@@ -55,10 +55,15 @@ class TestEngine(object):
         return self.last_create
 
     def get(self, resource, **kwargs):
+
+        memberid = kwargs.get('memberid', '')
+        cloud = kwargs.get('cloud', '')
+
         available_endpoints = {
+            'images': '/images/{}/{}/'.format(memberid, cloud),
             'members': '/members',
+            'version': '/version',
             'public-key': '/publicKey',
-            'version': '/version'
         }
 
         urlpath = available_endpoints[resource]

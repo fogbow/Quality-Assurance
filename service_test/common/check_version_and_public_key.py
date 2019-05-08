@@ -8,9 +8,6 @@ __all__ = ['VersionandPublicKeyCheck']
 
 class VersionandPublicKeyCheck(VersionCheck):
 
-    def __init__(self, service, configuration, resources):
-        return super().__init__(service, configuration, resources)
-
     def run(self):
         super().run()
         self.publickey()
