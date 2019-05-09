@@ -19,6 +19,6 @@ class VersionandPublicKeyCheck(VersionCheck):
         res = test.get('public-key').json()
         publickey = res['publicKey']
         
-        self.asserteq(len(publickey)%3, 0)
-        
+        self.assertgt(len(publickey), 0)
+
         self.endtest()

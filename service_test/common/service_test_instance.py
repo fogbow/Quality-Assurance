@@ -33,26 +33,23 @@ class ServiceTestInstance(object):
         self.port = self.conf['application']['port']
         self.origin = 'http://localhost:' + str(self.port)
 
-    @classmethod
     def starttest(cls, msg):
+        cls.endtest()
         testid = cls.nexttextcase()
-        cls.assert_count = 0
-        cls.assert_succ = 0
         cls.tests_info[testid] = msg
         print("-- Test {}: {}".format(testid, msg))
 
-    @classmethod
     def endtest(cls):
         if cls.assert_count > 0:
             if cls.assert_count != cls.assert_succ:
                 cls.failed_tests.append(cls.test_number)
+        cls.assert_count = 0
+        cls.assert_succ = 0
 
-    @classmethod
     def fail(cls):
         cls.assert_count += 1
         cls.endtest()
 
-    @classmethod
     def logresults(cls):
         print("%d tests were run" % cls.test_number)
         print("%d tests passed" % (cls.test_number - len(cls.failed_tests)))
@@ -180,16 +177,16 @@ class ServiceTestInstance(object):
         assertstr = 'assert'
         for cmp in comparation_functions:
             if(attribute == assertstr+cmp):
-                return Assertion(ServiceTestInstance, getattr(operator, cmp))
+                return Assertion(self, getattr(operator, cmp))
             
         raise AttributeError
 
-    @classmethod
+    # @classmethod
     def __assertion_ok__(self):
         self.assert_count += 1
         self.assert_succ += 1
 
-    @classmethod
+    # @classmethod
     def __assertion_fail__(self):
         self.assert_count += 1
 

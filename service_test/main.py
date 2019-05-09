@@ -8,6 +8,8 @@ from membership_service import MembersTest
 from resource_allocation_service import RASTest
 from common import *
 
+SKIP_SETUP_FLAG = '--skip-setup'
+SKIP_TEARDOWN_FLAG = '--skip-teardown'
 resources_path = 'test_resources'
 
 def getresources(service_resources ,required_resources):
@@ -51,32 +53,41 @@ if __name__ == "__main__":
     conf = getserviceconf(service_under_test)
     dependencies_services = []
 
-    # start dependencies services
-    for servicename in conf['services']:
-        serviceinstance = getservice(servicename)
-        serviceinstance.setup()
-
-        print(servicename, serviceinstance)
-        
-        dependencies_services.append(serviceinstance)
-        
-        # those setups may change current dir
-        os.chdir(curdir)
-
     print('###### Starting tests ######')
+    
+    runsetup = SKIP_SETUP_FLAG not in sys.argv
 
-    servicetest.setup()
+    if runsetup:
+
+        # start dependencies services
+        for servicename in conf['services']:
+            serviceinstance = getservice(servicename)
+            serviceinstance.setup()
+            serviceinstance.run()
+            
+            dependencies_services.append(serviceinstance)
+            
+            # those setups may change current dir
+            os.chdir(curdir)
+
+
+        servicetest.setup()
+        
     servicetest.run()
 
     print('###### Tests are over ######')
-    print('######  Tearing down  ######')
 
-    servicetest.teardown()
-    
-    for serviceinstance in dependencies_services:
-        serviceinstance.teardown()
+    runteardown = SKIP_TEARDOWN_FLAG not in sys.argv
+
+    if runteardown:
+        print('######  Tearing down  ######')
+
+        servicetest.teardown()
         
-        # these teardowns may change current dir
-        os.chdir(curdir)
+        for serviceinstance in dependencies_services:
+            serviceinstance.teardown()
+            
+            # these teardowns may change current dir
+            os.chdir(curdir)
 
     print('######  Done  ######')
