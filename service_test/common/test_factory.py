@@ -33,12 +33,7 @@ class TestEngine(object):
         return ret
 
     def create(self, resource, **kwargs):
-        available_endpoints = {
-            'token': '/tokens'
-        }
-
-        urlpath = available_endpoints[resource]
-        url = self.service_url + '/' + urlpath
+        url = self.__getserviceendpoint__(resource, **kwargs)
 
         headers = kwargs.get('headers', self.headers)
         body    = kwargs.get('body', self.body)
@@ -74,10 +69,13 @@ class TestEngine(object):
         cloud = kwargs.get('cloud', '')
 
         available_endpoints = {
+            'token': '/tokens',
             'images': '/images/{}/{}/'.format(memberid, cloud),
             'members': '/members',
             'version': '/version',
             'public-key': '/publicKey',
+            'networks': '/networks',
+            'compute': '/computes'
         }
 
         urlpath = available_endpoints[resource]

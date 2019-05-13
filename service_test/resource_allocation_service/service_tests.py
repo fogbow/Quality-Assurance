@@ -24,8 +24,12 @@ class RASTest(VersionandPublicKeyCheck):
         
         try:
             super().run()
+            
             self.getimages()
             self.getimagebyid()
+            
+            networkid = self.createnetwork()
+            computeid = self.createcompute()
         except Exception as e:
             self.fail()
             print("Interruped execution due to runtime error")
@@ -67,10 +71,30 @@ class RASTest(VersionandPublicKeyCheck):
         self.endtest()
 
     def createnetwork(self):
-        pass
+        self.starttest('POST network')
+        
+        body = self.resources['create_network']
+        res = self.__rasrequester__.create('networks', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        
+        self.endtest()
+        
+        ret = res.json()
+        return ret['id']
 
     def createcompute(self):
-        pass
+        self.starttest('POST compute')
+        
+        body = self.resources['create_compute']
+        res = self.__rasrequester__.create('compute', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        
+        self.endtest()
+        
+        ret = res.json()
+        return ret['id']
 
     def createvolume(self):
         pass
@@ -80,7 +104,7 @@ class RASTest(VersionandPublicKeyCheck):
 
     @classmethod
     def required_resources(self):
-        return ['auth_credentials']
+        return ['auth_credentials', 'create_network', 'create_compute']
 
     def __getpubkey__(self):
         res = self.__rasrequester__.get('public-key').json()
