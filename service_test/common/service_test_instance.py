@@ -48,7 +48,6 @@ class ServiceTestInstance(object):
 
     def fail(cls):
         cls.assert_count += 1
-        cls.endtest()
 
     def logresults(cls):
         print("%d tests were run" % cls.test_number)

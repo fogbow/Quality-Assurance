@@ -15,18 +15,14 @@ class TestEngine(object):
         self.body = {}
         self.headers = {}
 
-    def wait_until_ready(self, tries = 50):
-        if tries == 0:
+    def wait_until_ready(self, resource, instance_id, tries = 50):
+        if tries <= 0:
             return None
-        lasturl = str(self.last_create.url)
-        last_create = json.loads(self.last_create)
-        instance_id = last_create['id']
-        url = lasturl + '/' + instance_id
-        response_json = requests.get(url=url, headers=headers).json()
-        response = json.loads(response_json)
+        
+        res = self.getbyid(resource, id)
 
-        if response['state'] == InstanceState.READY:
-            ret = response
+        if res['state'] == InstanceState.READY:
+            ret = res
         else:
             ret = self.wait_until_ready(tries-1)
 
@@ -75,7 +71,9 @@ class TestEngine(object):
             'version': '/version',
             'public-key': '/publicKey',
             'networks': '/networks',
-            'compute': '/computes'
+            'compute': '/computes',
+            'volume': '/volumes',
+            'attachment': '/attachments'
         }
 
         urlpath = available_endpoints[resource]

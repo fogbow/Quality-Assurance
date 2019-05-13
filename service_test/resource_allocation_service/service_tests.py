@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 from common import TestEngine, VersionandPublicKeyCheck
 
 __all__ = ['RASTest']
@@ -30,6 +31,9 @@ class RASTest(VersionandPublicKeyCheck):
             
             networkid = self.createnetwork()
             computeid = self.createcompute()
+            volumeid = self.createvolume()
+
+            attachment = self.createattachment(volumeid, computeid)
         except Exception as e:
             self.fail()
             print("Interruped execution due to runtime error")
@@ -97,14 +101,36 @@ class RASTest(VersionandPublicKeyCheck):
         return ret['id']
 
     def createvolume(self):
-        pass
+        self.starttest('POST volume')
+        
+        body = self.resources['create_volume']
+        res = self.__rasrequester__.create('volume', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        
+        ret = res.json()
+        self.endtest()
+        
+        return ret['id']
 
-    def createattachment(self):
-        pass
+    def createattachment(self, volumeid, computeid):
+        self.starttest('POST attachment')
+        
+        body = self.__attachmentbodyrequests__(volumeid, computeid)
+        res = self.__rasrequester__.create('attachment', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        
+        print(res, res.json())
+        
+        self.endtest()
+        ret = res.json()
+        return ret['id']
 
     @classmethod
     def required_resources(self):
-        return ['auth_credentials', 'create_network', 'create_compute']
+        return ['auth_credentials', 'create_network', 'create_compute',
+            'create_volume']
 
     def __getpubkey__(self):
         res = self.__rasrequester__.get('public-key').json()
@@ -120,3 +146,9 @@ class RASTest(VersionandPublicKeyCheck):
         
         res = asrequester.create('token', body=credentials).json()
         return res['token']
+
+    def __attachmentbodyrequests__ (self, volumeid, computeid):
+        return {
+            "computeId": volumeid,
+            "volumeId": computeid
+        }
