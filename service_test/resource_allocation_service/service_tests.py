@@ -26,12 +26,15 @@ class RASTest(VersionandPublicKeyCheck):
         try:
             super().run()
             
-            self.getimages()
-            self.getimagebyid()
+            self.testgetimages()
+            self.testgetimagebyid()
             
             networkid = self.createnetwork()
             computeid = self.createcompute()
             volumeid = self.createvolume()
+
+            # # remove after implementing wait
+            # time.sleep(10)
 
             attachment = self.createattachment(volumeid, computeid)
         except Exception as e:
@@ -41,23 +44,18 @@ class RASTest(VersionandPublicKeyCheck):
         finally:
             self.logresults()
 
-    def getimages(self):
+    def testgetimages(self):
         self.starttest('GET Images')
         
-        res = self.__rasrequester__.get('images', **self.imageskwargs).json()
-        images = res.keys()
+        images = self.getimages()
         
         self.assertgt(len(images), 0)
         self.endtest()
-
-    def getimagebyid(self):
+    
+    def testgetimagebyid(self):
         self.starttest('GET Image by id')
         
-        res = self.__rasrequester__.get('images', **self.imageskwargs).json()
-        images = list(res.keys())
-
-        imageid = images[0]
-        imagedata = self.__rasrequester__.getbyid('images', imageid, **self.imageskwargs).json()
+        imagedata = self.getimagebyid()
 
         _id = imagedata['id']
         _name = imagedata['name']
@@ -74,44 +72,25 @@ class RASTest(VersionandPublicKeyCheck):
 
         self.endtest()
 
+    def getimages(self):
+        res = self.__rasrequester__.get('images', **self.imageskwargs).json()
+        return res.keys()
+
+    def getimagebyid(self):
+        res = self.__rasrequester__.get('images', **self.imageskwargs).json()
+        images = list(res.keys())
+
+        imageid = images[0]
+        return self.__rasrequester__.getbyid('images', imageid, **self.imageskwargs).json()
+
     def createnetwork(self):
-        self.starttest('POST network')
-        
-        body = self.resources['create_network']
-        res = self.__rasrequester__.create('networks', body=body)
-        
-        self.assertlt(res.status_code, 400)
-        
-        self.endtest()
-        
-        ret = res.json()
-        return ret['id']
+        return self.__testgenericorder__('network')
 
     def createcompute(self):
-        self.starttest('POST compute')
-        
-        body = self.resources['create_compute']
-        res = self.__rasrequester__.create('compute', body=body)
-        
-        self.assertlt(res.status_code, 400)
-        
-        self.endtest()
-        
-        ret = res.json()
-        return ret['id']
+        return self.__testgenericorder__('compute', True)
 
     def createvolume(self):
-        self.starttest('POST volume')
-        
-        body = self.resources['create_volume']
-        res = self.__rasrequester__.create('volume', body=body)
-        
-        self.assertlt(res.status_code, 400)
-        
-        ret = res.json()
-        self.endtest()
-        
-        return ret['id']
+        return self.__testgenericorder__('volume', True)
 
     def createattachment(self, volumeid, computeid):
         self.starttest('POST attachment')
@@ -120,8 +99,6 @@ class RASTest(VersionandPublicKeyCheck):
         res = self.__rasrequester__.create('attachment', body=body)
         
         self.assertlt(res.status_code, 400)
-        
-        print(res, res.json())
         
         self.endtest()
         ret = res.json()
@@ -146,6 +123,32 @@ class RASTest(VersionandPublicKeyCheck):
         
         res = asrequester.create('token', body=credentials).json()
         return res['token']
+
+    def __creategenericorder__(self, resource, parseresponse=False):
+        body = self.resources['create_{}'.format(resource.lower())]
+        res = self.__rasrequester__.create(resource.lower(), body=body)
+        
+        if parseresponse:
+            res = res.json()['id']
+        
+        return res
+
+    def __testgenericorder__(self, resource, waitready=False):
+        self.starttest('POST {}'.format(resource.capitalize()))
+
+        res = self.__creategenericorder__(resource)
+        
+        self.assertlt(res.status_code, 400)
+        
+        _id = res.json()['id']
+
+        if waitready:
+            res = self.__rasrequester__.wait_until_ready(resource, _id)
+            if not res:
+                raise Exception('Wait for order to be ready failed, resource: {} , id: {}'.format(resource, _id))
+
+        self.endtest()
+        return res.json()['id']
 
     def __attachmentbodyrequests__ (self, volumeid, computeid):
         return {

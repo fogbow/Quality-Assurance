@@ -2,16 +2,17 @@
 
 import json
 import requests
+import time
 
 from os import path
-from . import HttpMethods
+from . import HttpMethods, InstanceState
 
 __all__ = ['TestEngine']
 
 class TestEngine(object):
     def __init__(self, service_url):
         self.last_create = None
-        self.service_url = service_url;
+        self.service_url = service_url
         self.body = {}
         self.headers = {}
 
@@ -19,12 +20,13 @@ class TestEngine(object):
         if tries <= 0:
             return None
         
-        res = self.getbyid(resource, id)
-
-        if res['state'] == InstanceState.READY:
+        res = self.getbyid(resource, instance_id)
+        state = res.json()['state']
+        if state == InstanceState.READY:
             ret = res
         else:
-            ret = self.wait_until_ready(tries-1)
+            time.sleep(1)
+            ret = self.wait_until_ready(resource, instance_id, tries-1)
 
         return ret
 
@@ -46,8 +48,7 @@ class TestEngine(object):
 
     def getbyid(self, resource, _id, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
-
-        url = url + '/' + _id
+        url += '/' + _id
 
         return self.__executeget__(url, **kwargs)
 
@@ -70,7 +71,7 @@ class TestEngine(object):
             'members': '/members',
             'version': '/version',
             'public-key': '/publicKey',
-            'networks': '/networks',
+            'network': '/networks',
             'compute': '/computes',
             'volume': '/volumes',
             'attachment': '/attachments'
@@ -101,10 +102,13 @@ class FogbowRequest:
         verb_requester = getattr(requests, self.method)
         res = verb_requester(url=self.url, json=self.body, headers=self.headers)
 
-        print("\n---- Begin Response ----\n")
+        print("---- Request  ----")
         print("url: %s\n" % res.url)
         print("headers: %s\n" % res.headers)
-        print("json: %s\n" % res.json())
-        print("\n----  End Response  ----\n")
+        print("method: %s\n" % self.method.upper())
+        print("body: %s\n" % self.body)
+        print("---- Response ----")
+        print("reponse: %s\n" % res.json())
+        print("------------------")
 
         return res
