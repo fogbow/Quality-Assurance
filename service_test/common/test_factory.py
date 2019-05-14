@@ -43,7 +43,13 @@ class TestEngine(object):
 
     def get(self, resource, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
+        
+        return self.__executeget__(url, **kwargs)
 
+    def getall(self, resource, **kwargs):
+        url = self.__getserviceendpoint__(resource, **kwargs)
+        url += '/status'
+        
         return self.__executeget__(url, **kwargs)
 
     def getbyid(self, resource, _id, **kwargs):
@@ -74,6 +80,8 @@ class TestEngine(object):
             'network': '/networks',
             'compute': '/computes',
             'volume': '/volumes',
+            'cloud': '/clouds',
+            'publicIp': '/publicIps',
             'attachment': '/attachments'
         }
 
@@ -92,23 +100,26 @@ class TestEngine(object):
             print("Header content: {}".format(headervalue))
 
 class FogbowRequest:
-    def __init__(self, url, method = 'get', body = {}, headers = {}):
+    def __init__(self, url, **kwargs):
         self.url = url
-        self.headers = headers
-        self.body = body
-        self.method = method
+        self.headers = kwargs.get('headers', {})
+        self.body = kwargs.get('body', {})
+        self.method = kwargs.get('method', 'get')
+        self.enablelog = kwargs.get('enablelog', True)
 
     def execute(self):
         verb_requester = getattr(requests, self.method)
+        # print('before request', 'url=',self.url, 'json=',self.body, 'headers=',self.headers)
         res = verb_requester(url=self.url, json=self.body, headers=self.headers)
 
-        print("---- Request  ----")
-        print("url: %s\n" % res.url)
-        print("headers: %s\n" % res.headers)
-        print("method: %s\n" % self.method.upper())
-        print("body: %s\n" % self.body)
-        print("---- Response ----")
-        print("reponse: %s\n" % res.json())
-        print("------------------")
+        if self.enablelog:
+            print("---- Request  ----")
+            print("url: %s\n" % res.url)
+            print("headers: %s\n" % res.headers)
+            print("method: %s\n" % self.method.upper())
+            print("body: %s\n" % self.body)
+            print("---- Response ----")
+            print("reponse: %s\n" % res.json())
+            print("------------------")
 
         return res
