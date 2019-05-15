@@ -16,6 +16,7 @@ class Assertion(object):
         if assertpassed:
             self.suite.__assertion_ok__()
         else:
+            print("Assertion failed: given: {}, expected {}".format(obtained, expected))
             self.suite.__assertion_fail__()
             
         return assertpassed

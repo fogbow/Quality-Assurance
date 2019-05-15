@@ -37,7 +37,7 @@ class ServiceTestInstance(object):
         cls.endtest()
         testid = cls.nexttextcase()
         cls.tests_info[testid] = msg
-        print("-- Test {}: {}".format(testid, msg))
+        print("\n-- Test {}: {}".format(testid, msg))
 
     def endtest(cls):
         if cls.assert_count > 0:
@@ -180,12 +180,10 @@ class ServiceTestInstance(object):
             
         raise AttributeError
 
-    # @classmethod
     def __assertion_ok__(self):
         self.assert_count += 1
         self.assert_succ += 1
 
-    # @classmethod
     def __assertion_fail__(self):
         self.assert_count += 1
 

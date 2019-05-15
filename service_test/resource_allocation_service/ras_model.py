@@ -39,6 +39,21 @@ class RasModel(object):
     def create(self, resource, **kwargs):
         return self.__rasrequester__.create(resource, **kwargs)
 
+    def createmany(self, resource, howmany=1, **kwargs):
+        responses = []
+        
+        for i in range(howmany):
+            res = self.__rasrequester__.create(resource, **kwargs)
+            
+            wait_until_ready = kwargs.get('wait_ready', False)
+            if wait_until_ready:
+                _id = res.json()['id']
+                res = self.__rasrequester__.wait_until_ready('compute', _id)
+
+            responses.append(res)
+        
+        return responses
+
     def get(self, resource, **kwargs):
         return self.__rasrequester__.get(resource, **kwargs)
 

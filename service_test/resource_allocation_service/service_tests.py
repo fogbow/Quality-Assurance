@@ -18,21 +18,38 @@ class RASTest(VersionandPublicKeyCheck):
         try:
             super().run()
             self.rasmodel = RasModel(self.origin, self.resources, self.conf)
-            
+
+            # # GET {resource}/status
             self.testgetimages()
             self.testgetimagebyid()
-
             self.testgetstatus()
+
             
-            networkid = self.testcreatenetwork()
+            # Create a attachment
             computeid = self.testcreatecompute()
             volumeid = self.testcreatevolume()
-
-            attachment = self.testcreateattachment(volumeid, computeid)
-            computewithnetwork = self.testcreatecomputewithnetwork(networkid)
+            attachmentid = self.testcreateattachment(volumeid, computeid)
             
-            self.testdeletenetworkwithcomputeattached(networkid)
-            self.testdeleteattachedcompute(computeid)
+            self.test_fail_delete_compute_with_volume_attached(computeid)
+            self.test_fail_delete_volume_attached_to_compute(volumeid)
+
+            self.testdeleteattchment(attachmentid)
+            self.testdeletecompute(computeid)
+            self.testdeletevolume(volumeid)
+            
+            # Create a single computes in the same network
+            networkid = self.testcreatenetwork()
+            computewithnetwork = self.testcreatecomputewithnetwork(networkid)
+            self.test_fail_delete_network_with_compute_attached(networkid)
+            self.testdeletecompute(computewithnetwork)
+            self.testdeletenetwork(networkid)
+
+            # Create a bunch of computes in the same network
+            networkid = self.testcreatenetwork()
+            computes = self.testcreatemanycomputeswithnetwork(networkid)
+            self.test_fail_delete_network_with_compute_attached(networkid)
+            self.testdeletemanycomputes(computes)
+            self.testdeletenetwork(networkid)
 
         except Exception as e:
 
@@ -79,7 +96,7 @@ class RASTest(VersionandPublicKeyCheck):
         self.endtest()
 
     def testcreatenetwork(self):
-        return self.__testcreategenericorder__('network')
+        return self.__testcreategenericorder__('network', True)
 
     def testcreatecompute(self):
         return self.__testcreategenericorder__('compute', True)
@@ -99,29 +116,74 @@ class RASTest(VersionandPublicKeyCheck):
         ret = res.json()
         return ret['id']
 
-    def testcreatecomputewithnetwork(self, network):
-        self.starttest('POST compute passign some network')
+    def testcreatecomputewithnetwork(self, networkid):
+        self.starttest('POST compute passing a network')
         
-        body = copy.deepcopy(self.resources['create_compute'])
-        body['networkIds'] = [network]
+        body = self.__getcompuebodyrequest__(networkid)
         
         res = self.rasmodel.create('compute', body=body)
         
         self.assertlt(res.status_code, 400)
         self.endtest()
+        ret = res.json()
+        return ret['id']
 
-    def testdeletenetworkwithcomputeattached(self, network):
-        self.starttest('DELETE network with orders attached (should fail)')
-        
-        res = self.rasmodel.delete('network', network)
-        
-        self.assertge(res.status_code, 400)
+    def test_fail_delete_network_with_compute_attached(self, networkid):
+        self.__testfaildeletebusyorder__('network', networkid)
+
+    def test_fail_delete_compute_with_volume_attached(self, computeid):
+        self.__testfaildeletebusyorder__('compute', computeid)
+
+    def test_fail_delete_volume_attached_to_compute(self, volumeid):
+        self.__testfaildeletebusyorder__('volume', volumeid)
+
+    def testdeleteattchment(self, attachmentid):
+        self.__testgenericdelete__('attachment', attachmentid)
+    
+    def testdeletecompute(self, computeid):
+        self.__testgenericdelete__('compute', computeid)
+    
+    def testdeletevolume(self, volumeid):
+        self.__testgenericdelete__('volume', volumeid)
+
+    def testdeletenetwork(self, networkid):
+        self.__testgenericdelete__('network', networkid)
+
+    def testcreatemanycomputeswithnetwork(self, networkid, howmany=5):
+        self.starttest("POST many computes with network {}".format(networkid))
+
+        body = self.__getcompuebodyrequest__(networkid)
+        computesresponses = self.rasmodel.createmany('compute', howmany, body=body, wait_ready=True)
+
+        for res in computesresponses:
+            self.assertlt(res.status_code, 400)
+
+        self.endtest()
+        return computesresponses
+
+    def testdeletemanycomputes(self, computes):
+        self.starttest("Deleting many computes")
+
+        for compute in computes:
+            data = compute.json()
+            computeid = data['id']
+            response = self.rasmodel.delete('compute', computeid)
+            self.assertlt(response.status_code, 400)
+
         self.endtest()
 
     @classmethod
     def required_resources(self):
         return ['auth_credentials', 'create_network', 'create_compute',
             'create_volume']
+
+    def __testfaildeletebusyorder__(self, resource, _id):
+        self.starttest('DELETE {} with orders attached (should fail)'.format(resource.capitalize()))
+        
+        res = self.rasmodel.delete(resource, _id)
+        
+        self.assertge(res.status_code, 400)
+        self.endtest()
 
     def __testcreategenericorder__(self, resource, waitready=False):
         self.starttest('POST {}'.format(resource.capitalize()))
@@ -148,8 +210,21 @@ class RASTest(VersionandPublicKeyCheck):
 
         self.endtest()
 
+    def __testgenericdelete__(self, resource, _id):
+        self.starttest('DELETE {} with id {}'.format(resource.capitalize(), _id))
+
+        res = self.rasmodel.delete(resource, _id)
+        
+        self.assertlt(res.status_code, 400)
+        self.endtest()
+
     def __attachmentbodyrequests__ (self, volumeid, computeid):
         return {
             "computeId": computeid,
             "volumeId": volumeid
         }
+
+    def __getcompuebodyrequest__(self, networkid):
+        body = copy.deepcopy(self.resources['create_compute'])
+        body['networkIds'] = [networkid]
+        return body
