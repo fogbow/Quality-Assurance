@@ -48,6 +48,9 @@ class RasModel(object):
     def getbyid(self, resource, _id, **kwargs):
         return self.__rasrequester__.getbyid(resource, _id, **kwargs)
 
+    def delete(self, resource, _id, **kwargs):
+        return self.__rasrequester__.delete(resource, _id, **kwargs)
+
     def creategenericorder(self, resource, parseresponse=False):
         body = self.resources['create_{}'.format(resource.lower())]
         res = self.__rasrequester__.create(resource.lower(), body=body)

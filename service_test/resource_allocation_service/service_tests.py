@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import time
 
 from common import TestEngine, VersionandPublicKeyCheck
@@ -9,10 +10,9 @@ __all__ = ['RASTest']
 
 class RASTest(VersionandPublicKeyCheck):
 
-    # def __init__(self, service, configuration, resources):
-    #     super().__init__(service, configuration, resources)
-        
-        
+    def __init__(self, service, configuration, resources):
+        super().__init__(service, configuration, resources)
+        self.resources = resources
 
     def run(self):
         try:
@@ -29,6 +29,10 @@ class RASTest(VersionandPublicKeyCheck):
             volumeid = self.testcreatevolume()
 
             attachment = self.testcreateattachment(volumeid, computeid)
+            computewithnetwork = self.testcreatecomputewithnetwork(networkid)
+            
+            self.testdeletenetworkwithcomputeattached(networkid)
+            self.testdeleteattachedcompute(computeid)
 
         except Exception as e:
 
@@ -95,6 +99,25 @@ class RASTest(VersionandPublicKeyCheck):
         ret = res.json()
         return ret['id']
 
+    def testcreatecomputewithnetwork(self, network):
+        self.starttest('POST compute passign some network')
+        
+        body = copy.deepcopy(self.resources['create_compute'])
+        body['networkIds'] = [network]
+        
+        res = self.rasmodel.create('compute', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        self.endtest()
+
+    def testdeletenetworkwithcomputeattached(self, network):
+        self.starttest('DELETE network with orders attached (should fail)')
+        
+        res = self.rasmodel.delete('network', network)
+        
+        self.assertge(res.status_code, 400)
+        self.endtest()
+
     @classmethod
     def required_resources(self):
         return ['auth_credentials', 'create_network', 'create_compute',
@@ -127,6 +150,6 @@ class RASTest(VersionandPublicKeyCheck):
 
     def __attachmentbodyrequests__ (self, volumeid, computeid):
         return {
-            "computeId": volumeid,
-            "volumeId": computeid
+            "computeId": computeid,
+            "volumeId": volumeid
         }

@@ -44,26 +44,33 @@ class TestEngine(object):
     def get(self, resource, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
         
-        return self.__executeget__(url, **kwargs)
+        return self.__execute__(url, **kwargs)
 
     def getall(self, resource, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
         url += '/status'
         
-        return self.__executeget__(url, **kwargs)
+        return self.__execute__(url, **kwargs)
 
     def getbyid(self, resource, _id, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
         url += '/' + _id
 
-        return self.__executeget__(url, **kwargs)
+        return self.__execute__(url, **kwargs)
 
-    def __executeget__(self, url, **kwargs):
+    def delete(self, resource, _id, **kwargs):
+        url = self.__getserviceendpoint__(resource, **kwargs)
+        url += '/' + _id
+
+        return self.__execute__(url, method=HttpMethods.DELETE, **kwargs)
+
+    def __execute__(self, url, **kwargs):
         
         headers = kwargs.get('headers', self.headers)
         body    = kwargs.get('body', self.body)
+        method  = kwargs.get('method', HttpMethods.GET)
 
-        req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.GET))
+        req = FogbowRequest(url=url, headers=headers, body=body, method=method)
         
         return req.execute()
 
@@ -109,7 +116,6 @@ class FogbowRequest:
 
     def execute(self):
         verb_requester = getattr(requests, self.method)
-        # print('before request', 'url=',self.url, 'json=',self.body, 'headers=',self.headers)
         res = verb_requester(url=self.url, json=self.body, headers=self.headers)
 
         if self.enablelog:
