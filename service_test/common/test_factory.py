@@ -119,13 +119,6 @@ class FogbowRequest:
         res = verb_requester(url=self.url, json=self.body, headers=self.headers)
 
         if self.enablelog:
-            print("---- Request  ----")
-            print("url: %s\n" % res.url)
-            print("headers: %s\n" % res.headers)
-            print("method: %s\n" % self.method.upper())
-            print("body: %s\n" % self.body)
-            print("---- Response ----")
-            print("reponse: %s\n" % res.json())
-            print("------------------")
+            print("\n{} {}".format(self.method.upper(), res.url, ))
 
         return res
