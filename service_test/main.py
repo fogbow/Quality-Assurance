@@ -78,7 +78,8 @@ if __name__ == "__main__":
 
     runteardown = SKIP_TEARDOWN_FLAG not in sys.argv
 
-    if runteardown:
+    # There's no point on tearing down if you don't setup
+    if runsetup and runteardown:
         print('######  Tearing down  ######')
 
         servicetest.teardown()

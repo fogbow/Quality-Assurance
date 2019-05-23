@@ -88,7 +88,7 @@ class TestEngine(object):
             'compute': '/computes',
             'volume': '/volumes',
             'cloud': '/clouds',
-            'publicIp': '/publicIps',
+            'public-ip': '/publicIps',
             'attachment': '/attachments'
         }
 

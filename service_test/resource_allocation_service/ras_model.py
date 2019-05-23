@@ -42,10 +42,16 @@ class RasModel(object):
     def createmany(self, resource, howmany=1, **kwargs):
         responses = []
         
+        # TODO: First create all instances and after that wait
+        # for instances to be ready. Current implementation 
+        # create a single instance and then wait it for be ready 
+        # which takes take a lot of time when the number of 
+        # requested instances are high
         for i in range(howmany):
             res = self.__rasrequester__.create(resource, **kwargs)
             
             wait_until_ready = kwargs.get('wait_ready', False)
+            
             if wait_until_ready:
                 _id = res.json()['id']
                 res = self.__rasrequester__.wait_until_ready('compute', _id)
@@ -88,3 +94,6 @@ class RasModel(object):
 
         imageid = images[0]
         return self.__rasrequester__.getbyid('images', imageid, **self.imageskwargs).json()
+
+    def genericrequest(self, url):
+        return self.__rasrequester__.__execute__(url)

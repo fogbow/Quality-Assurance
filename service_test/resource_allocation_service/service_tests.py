@@ -19,18 +19,20 @@ class RASTest(VersionandPublicKeyCheck):
             super().run()
             self.rasmodel = RasModel(self.origin, self.resources, self.conf)
 
-            # # GET {resource}/status
+            # GET {resource}/status
             self.testgetimages()
             self.testgetimagebyid()
             self.testgetstatus()
 
+            # GET clouds
+            self.testgetclouds()
             
             # Create a attachment
             computeid = self.testcreatecompute()
             volumeid = self.testcreatevolume()
             attachmentid = self.testcreateattachment(volumeid, computeid)
             
-            self.test_fail_delete_compute_with_volume_attached(computeid)
+            self.test_fail_delete_compute_with_order_attached(computeid)
             self.test_fail_delete_volume_attached_to_compute(volumeid)
 
             self.testdeleteattchment(attachmentid)
@@ -50,6 +52,13 @@ class RASTest(VersionandPublicKeyCheck):
             self.test_fail_delete_network_with_compute_attached(networkid)
             self.testdeletemanycomputes(computes)
             self.testdeletenetwork(networkid)
+
+            # Create Public Ip
+            computeid = self.testcreatecompute()
+            publicip = self.testcreatepublicip(computeid)
+            self.test_fail_delete_compute_with_order_attached(computeid)
+            self.testdeletepublicip(publicip)
+            self.testdeletecompute(computeid)
 
         except Exception as e:
 
@@ -95,6 +104,19 @@ class RASTest(VersionandPublicKeyCheck):
 
         self.endtest()
 
+    def testgetclouds(self):
+        self.starttest("GET cloud(s)")
+        cloudsendpoint = self.origin + '/clouds'
+        cloudsresponse = self.rasmodel.genericrequest(cloudsendpoint)
+        
+        if self.assertlt(cloudsresponse.status_code, 400):
+            
+            clouds = cloudsresponse.json().get('clouds')
+            
+            self.asserteq(type(clouds), list)
+
+        self.endtest()
+
     def testcreatenetwork(self):
         return self.__testcreategenericorder__('network', True)
 
@@ -128,10 +150,22 @@ class RASTest(VersionandPublicKeyCheck):
         ret = res.json()
         return ret['id']
 
+    def testcreatepublicip(self, computeid):
+        self.starttest('POST public ip for compute: {}'.format(computeid))
+
+        body = {'computeId': computeid}
+        res = self.rasmodel.create('public-ip', body=body)
+        
+        self.assertlt(res.status_code, 400)
+        self.endtest()
+        
+        ret = res.json()
+        return ret['id']
+
     def test_fail_delete_network_with_compute_attached(self, networkid):
         self.__testfaildeletebusyorder__('network', networkid)
 
-    def test_fail_delete_compute_with_volume_attached(self, computeid):
+    def test_fail_delete_compute_with_order_attached(self, computeid):
         self.__testfaildeletebusyorder__('compute', computeid)
 
     def test_fail_delete_volume_attached_to_compute(self, volumeid):
@@ -148,6 +182,9 @@ class RASTest(VersionandPublicKeyCheck):
 
     def testdeletenetwork(self, networkid):
         self.__testgenericdelete__('network', networkid)
+
+    def testdeletepublicip(self, publicip):
+        self.__testgenericdelete__('public-ip', publicip)
 
     def testcreatemanycomputeswithnetwork(self, networkid, howmany=5):
         self.starttest("POST many computes with network {}".format(networkid))
@@ -192,7 +229,7 @@ class RASTest(VersionandPublicKeyCheck):
         
         self.assertlt(res.status_code, 400)
         
-        _id = res.json()['id']
+        _id = res.json().get('id')
 
         if waitready:
             res = self.rasmodel.wait_until_ready(resource, _id)
