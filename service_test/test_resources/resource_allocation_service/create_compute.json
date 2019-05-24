@@ -1,0 +1,7 @@
+{
+    "name": "qa-anderson",
+    "vCPU" : 1,
+    "memory" : 512,
+    "disk" : 20,
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC21jUErmtVB14GJ9lZg0mGj1GlHj9KTP1P6uyqEqxVMVnGCMEL7eanXIbZl3Brz0EBhYWR4eg/RPMUPS7YOxvp2NeX/4O3J/eCrlUzZyxPqmxASp2U47sGzbgun9VbjHIb9zKEw6AkfxQvapoW3lcFacX07owNoWEAVK7/zs6IPrOOOPaj7WtFpqcVoc9UwabWFb8A6cr5TxSwaNwLtitec/R1LAnXIl/B5uswKrpSnywGS1BctshgahEXiEnsymvIJ4IPIPbwTaXaFWzelzisWqc7aZsfFYXP4ynWWkoe10DmwJbweZHInn4upx8gd1pMwPLT5JzKgg7iLEA/sdI2IvzkEse9WDXAJcV+Gki2mtksmqctogf5wrh0p/2j/JuX6v6FBIOW6n1hYycxSm0yddkoainRhv8fHVCHnRq5WYEntMMGOU3krjy6dWVmXcVf436qNpxCndZf1buEsWWnXduqphD292qYrLELmWGx4NiDlGSzANJ4rb7MTKcNPbqMhTVmC3Xm0vQ9hluLGSnLWzxmqVOa0k1KZNrzTfJRTNWo0f2myOU1l+UxQZ+gy/V4zctyYMepQ9xBiwo+XQiTIKOhxSXo6ohmnc+FSnjxkPXmfs9KfHttKxUAX8hqrMUmE+TLuVlL1nV4TPCXh2PD+nUPUq5FJP0d4enkn5xFJQ== anderson@lsd.ufcg.edu.br"
+  }

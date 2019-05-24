@@ -1,0 +1,11 @@
+{
+  "services": [],
+  "application": {
+    "branch_under_test": "develop",
+    "repo_url": "https://github.com/fogbow/membership-service.git",
+    "port": 8080
+  },
+  "commands": {
+    "run_application": "/usr/bin/mvn spring-boot:run"
+  }
+}

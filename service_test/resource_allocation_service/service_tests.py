@@ -71,7 +71,7 @@ class RASTest(VersionandPublicKeyCheck):
             self.logresults()
 
     def testgetstatus(self):
-        resources = ['attachment', 'compute', 'network', 'publicIp', 'volume']
+        resources = ['attachment', 'compute', 'network', 'public-ip', 'volume']
 
         for resource in resources:
             self.__testgetalloders__(resource)
@@ -136,7 +136,7 @@ class RASTest(VersionandPublicKeyCheck):
         
         self.endtest()
         ret = res.json()
-        return ret['id']
+        return ret.get('id')
 
     def testcreatecomputewithnetwork(self, networkid):
         self.starttest('POST compute passing a network')
@@ -148,7 +148,7 @@ class RASTest(VersionandPublicKeyCheck):
         self.assertlt(res.status_code, 400)
         self.endtest()
         ret = res.json()
-        return ret['id']
+        return ret.get('id')
 
     def testcreatepublicip(self, computeid):
         self.starttest('POST public ip for compute: {}'.format(computeid))
@@ -160,7 +160,7 @@ class RASTest(VersionandPublicKeyCheck):
         self.endtest()
         
         ret = res.json()
-        return ret['id']
+        return ret.get('id')
 
     def test_fail_delete_network_with_compute_attached(self, networkid):
         self.__testfaildeletebusyorder__('network', networkid)

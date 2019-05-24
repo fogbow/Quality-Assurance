@@ -1,0 +1,11 @@
+{
+  "services": [],
+  "application": {
+    "branch_under_test": "develop",
+    "repo_url": "https://github.com/fogbow/authentication-service.git",
+    "port": 8081
+  },
+  "commands": {
+    "run_application": "./mvnw spring-boot:run -Drun.profiles=dev"
+  }
+}
