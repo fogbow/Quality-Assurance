@@ -1,5 +1,5 @@
 {
-  "services": ["authentication_service"],
+  "services": ["authentication_service", "membership_service"],
   "as_url": "http://localhost:8081/as",
   "memberid": "anderson-member1.lsd.ufcg.edu.br",
   "cloud": "emulated",
@@ -10,6 +10,6 @@
     "api_endpoint": "http://localhost:8080/ras"
   },
   "commands": {
-    "run_application": "/usr/bin/mvn spring-boot:run"
+    "run_application": "/usr/bin/mvn spring-boot:run -Dspring.profiles.active=dev"
   }
 }

@@ -7,6 +7,6 @@
     "api_endpoint": "http://localhost:8081/as"
   },
   "commands": {
-    "run_application": "./mvnw spring-boot:run -Drun.profiles=dev"
+    "run_application": "/usr/bin/mvn spring-boot:run -Dspring.profiles.active=dev"
   }
 }
