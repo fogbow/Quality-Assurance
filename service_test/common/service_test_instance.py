@@ -31,7 +31,8 @@ class ServiceTestInstance(object):
         self.pid = None
         self.resources = resources
         self.port = self.conf['application']['port']
-        self.origin = 'http://localhost:' + str(self.port)
+        self.api_endpoint = self.conf['application']['api_endpoint']
+        self.origin = self.api_endpoint
 
     def starttest(cls, msg):
         cls.endtest()

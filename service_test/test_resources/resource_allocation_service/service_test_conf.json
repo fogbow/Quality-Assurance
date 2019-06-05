@@ -1,12 +1,13 @@
 {
   "services": ["authentication_service"],
-  "as_url": "http://localhost:8081",
+  "as_url": "http://localhost:8081/as",
   "memberid": "anderson-member1.lsd.ufcg.edu.br",
   "cloud": "emulated",
   "application": {
     "branch_under_test": "emulated-plugins",
     "repo_url": "https://github.com/fogbow/resource-allocation-service.git",
-    "port": 8080
+    "port": 8080,
+    "api_endpoint": "http://localhost:8080/ras"
   },
   "commands": {
     "run_application": "/usr/bin/mvn spring-boot:run"

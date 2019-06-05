@@ -11,7 +11,6 @@ __all__ = ['TestEngine']
 
 class TestEngine(object):
     def __init__(self, service_url):
-        self.last_create = None
         self.service_url = service_url
         self.body = {}
         self.headers = {}
@@ -37,9 +36,7 @@ class TestEngine(object):
         body    = kwargs.get('body', self.body)
 
         req = FogbowRequest(url=url, headers=headers, body=body, method=str(HttpMethods.POST))
-        self.last_create = req.execute()
-
-        return self.last_create
+        return req.execute()
 
     def get(self, resource, **kwargs):
         url = self.__getserviceendpoint__(resource, **kwargs)
@@ -75,8 +72,9 @@ class TestEngine(object):
         return req.execute()
 
     def __getserviceendpoint__(self, resource, **kwargs):
-        memberid = kwargs.get('memberid', '')
-        cloud = kwargs.get('cloud', '')
+        memberid = kwargs.get('memberid')
+        cloud = kwargs.get('cloud')
+        pubip = kwargs.get('pubip')
 
         available_endpoints = {
             'token': '/tokens',
@@ -89,7 +87,8 @@ class TestEngine(object):
             'volume': '/volumes',
             'cloud': '/clouds',
             'public-ip': '/publicIps',
-            'attachment': '/attachments'
+            'attachment': '/attachments',
+            'secrule-publicip': '/publicIps/{}/securityRules/'.format(pubip)
         }
 
         urlpath = available_endpoints[resource]

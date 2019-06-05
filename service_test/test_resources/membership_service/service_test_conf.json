@@ -3,7 +3,8 @@
   "application": {
     "branch_under_test": "develop",
     "repo_url": "https://github.com/fogbow/membership-service.git",
-    "port": 8080
+    "port": 8080,
+    "api_endpoint": "http://localhost:8081/ms"
   },
   "commands": {
     "run_application": "/usr/bin/mvn spring-boot:run"

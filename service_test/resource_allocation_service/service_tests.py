@@ -3,8 +3,8 @@
 import copy
 import time
 
-from common import TestEngine, VersionandPublicKeyCheck
-from . import RasModel
+from common import TestEngine, VersionandPublicKeyCheck, HttpMethods
+from . import RasModel, RasUrls
 
 __all__ = ['RASTest']
 
@@ -20,8 +20,8 @@ class RASTest(VersionandPublicKeyCheck):
             self.rasmodel = RasModel(self.origin, self.resources, self.conf)
 
             # GET {resource}/status
-            self.testgetimages()
-            self.testgetimagebyid()
+            images = self.testgetimages()
+            self.testgetimagebyid(images)
             self.testgetstatus()
 
             # GET clouds
@@ -57,6 +57,9 @@ class RASTest(VersionandPublicKeyCheck):
             computeid = self.testcreatecompute()
             publicip = self.testcreatepublicip(computeid)
             self.test_fail_delete_compute_with_order_attached(computeid)
+
+            # Test Create SecurityRule over public ip
+            securityrule = self.testcreatesecurityrule(publicip)
             self.testdeletepublicip(publicip)
             self.testdeletecompute(computeid)
 
@@ -79,17 +82,20 @@ class RASTest(VersionandPublicKeyCheck):
     def testgetimages(self):
         self.starttest('GET Images')
         
+        print('images received', )
         images = self.rasmodel.getimages()
+
         
         self.assertgt(len(images), 0)
         self.endtest()
+        return images
     
-    def testgetimagebyid(self):
+    def testgetimagebyid(self, images):
         self.starttest('GET Image by id')
+        _id = images[0]['id']
         
-        imagedata = self.rasmodel.getimagebyid()
+        imagedata = self.rasmodel.getimagebyid(_id)
 
-        _id = imagedata['id']
         _name = imagedata['name']
         _size = imagedata['size']
 
@@ -209,10 +215,25 @@ class RASTest(VersionandPublicKeyCheck):
 
         self.endtest()
 
+    def testcreatesecurityrule(self, pubip):
+        self.starttest('POST security rule on public ip')
+
+        body = self.resources['create_securityrule'].copy()
+        _id = self.rasmodel.create('secrule-publicip', body=body, pubip=pubip)
+        # path = RasUrls.pubipsecrule.format(pubip)
+        # url = self.origin + path
+
+        # res = self.rasmodel.genericrequest(url, body=body, method=HttpMethods.POST)
+
+        self.assertlt(res.status_code, 400)
+        
+        self.endtest()
+        
+
     @classmethod
     def required_resources(self):
         return ['auth_credentials', 'create_network', 'create_compute',
-            'create_volume']
+            'create_volume', 'create_securityrule']
 
     def __testfaildeletebusyorder__(self, resource, _id):
         self.starttest('DELETE {} with orders attached (should fail)'.format(resource.capitalize()))

@@ -77,7 +77,7 @@ class RasModel(object):
         res = self.__rasrequester__.create(resource.lower(), body=body)
         
         if parseresponse:
-            res = res.json()['id']
+            res = res.json().get('id')
         
         return res
 
@@ -86,14 +86,10 @@ class RasModel(object):
 
     def getimages(self):
         res = self.__rasrequester__.get('images', **self.imageskwargs).json()
-        return res.keys()
+        return res
     
-    def getimagebyid(self):
-        res = self.__rasrequester__.get('images', **self.imageskwargs).json()
-        images = list(res.keys())
-
-        imageid = images[0]
+    def getimagebyid(self, imageid):
         return self.__rasrequester__.getbyid('images', imageid, **self.imageskwargs).json()
 
-    def genericrequest(self, url):
-        return self.__rasrequester__.__execute__(url)
+    def genericrequest(self, url, **kwargs):
+        return self.__rasrequester__.__execute__(url, **kwargs)
