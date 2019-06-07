@@ -7,7 +7,7 @@ import time
 from os import path
 from . import HttpMethods, InstanceState
 
-__all__ = ['TestEngine']
+__all__ = ['TestEngine', 'FogbowRequest']
 
 class TestEngine(object):
     def __init__(self, service_url):
@@ -15,17 +15,19 @@ class TestEngine(object):
         self.body = {}
         self.headers = {}
 
-    def wait_until_ready(self, resource, instance_id, tries = 50):
+    def wait_until_ready(self, resource, instance_id, **kwargs):
+        tries = kwargs.get('tries', 50)
         if tries <= 0:
             return None
         
-        res = self.getbyid(resource, instance_id)
+        res = self.getbyid(resource, instance_id, **kwargs)
         state = res.json()['state']
         if state == InstanceState.READY:
             ret = res
         else:
             time.sleep(1)
-            ret = self.wait_until_ready(resource, instance_id, tries-1)
+            kwargs['tries'] = tries-1
+            ret = self.wait_until_ready(resource, instance_id, **kwargs)
 
         return ret
 
@@ -106,6 +108,11 @@ class TestEngine(object):
             print("Header content: {}".format(headervalue))
 
 class FogbowRequest:
+
+    commonsettings = {
+        'body': {}
+    }
+
     def __init__(self, url, **kwargs):
         self.url = url
         self.headers = kwargs.get('headers', {})
@@ -113,9 +120,16 @@ class FogbowRequest:
         self.method = kwargs.get('method', 'get')
         self.enablelog = kwargs.get('enablelog', True)
 
+    @classmethod
+    def addsetting(cls, key, setting):
+        cls.commonsettings[key] = setting
+
     def execute(self):
         verb_requester = getattr(requests, self.method)
-        res = verb_requester(url=self.url, json=self.body, headers=self.headers)
+
+        body = { **self.commonsettings, **self.body }
+
+        res = verb_requester(url=self.url, json=body, headers=self.headers)
 
         if self.enablelog:
             print("\n{} {}".format(self.method.upper(), res.url, ))

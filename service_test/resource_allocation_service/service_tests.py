@@ -161,12 +161,14 @@ class RASTest(VersionandPublicKeyCheck):
 
         body = {'computeId': computeid}
         res = self.rasmodel.create('public-ip', body=body)
+        _id = res.json().get('id')
+
+        self.rasmodel.wait_until_ready('public-ip', _id)        
         
         self.assertlt(res.status_code, 400)
         self.endtest()
         
-        ret = res.json()
-        return ret.get('id')
+        return _id
 
     def test_fail_delete_network_with_compute_attached(self, networkid):
         self.__testfaildeletebusyorder__('network', networkid)
@@ -217,14 +219,11 @@ class RASTest(VersionandPublicKeyCheck):
 
     def testcreatesecurityrule(self, pubip):
         self.starttest('POST security rule on public ip')
-
+        
         body = self.resources['create_securityrule'].copy()
-        _id = self.rasmodel.create('secrule-publicip', body=body, pubip=pubip)
-        # path = RasUrls.pubipsecrule.format(pubip)
-        # url = self.origin + path
-
-        # res = self.rasmodel.genericrequest(url, body=body, method=HttpMethods.POST)
-
+        res = self.rasmodel.create('secrule-publicip', body=body, pubip=pubip)
+        _id = res.json().get('id')
+        
         self.assertlt(res.status_code, 400)
         
         self.endtest()

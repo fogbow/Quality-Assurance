@@ -12,8 +12,8 @@ class RasModel(object):
         self.__rasrequester__ = TestEngine(origin)
         
         pubkey = self.getpubkey()
-
         token = self.createtoken(pubkey)
+
         self.__rasrequester__.addHeader('Fogbow-User-Token', token)
 
         self.imageskwargs = {
@@ -29,6 +29,16 @@ class RasModel(object):
         
         as_url = self.conf['as_url']
         asrequester = TestEngine(as_url)
+
+        credentials = self.resources['auth_credentials']
+        credentials['publicKey'] = pubkey
+        
+        res = asrequester.create('token', body=credentials).json()
+        return res['token']
+
+    def getmembers(self):
+        ms_url = self.conf['as_url']
+        msrequester = TestEngine(ms_url)
 
         credentials = self.resources['auth_credentials']
         credentials['publicKey'] = pubkey
@@ -81,8 +91,8 @@ class RasModel(object):
         
         return res
 
-    def wait_until_ready(self, resource, _id):
-        return self.__rasrequester__.wait_until_ready(resource, _id)
+    def wait_until_ready(self, resource, _id, **kwargs):
+        return self.__rasrequester__.wait_until_ready(resource, _id, **kwargs)
 
     def getimages(self):
         res = self.__rasrequester__.get('images', **self.imageskwargs).json()

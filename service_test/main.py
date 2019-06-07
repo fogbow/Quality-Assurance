@@ -43,6 +43,8 @@ def getservice(servicename):
     return ServiceTest(servicename, configuration, service_resources)
 
 if __name__ == "__main__":
+    # Delete me
+    FogbowRequest.addsetting('body', {'foo': 'barz'})
 
     curdir = os.getcwd()
 
