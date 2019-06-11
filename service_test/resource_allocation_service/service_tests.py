@@ -3,7 +3,7 @@
 import copy
 import time
 
-from common import FogbowHttpUtil, VersionandPublicKeyCheck, HttpMethods
+from common import FogbowHttpUtil, FogbowRequest, VersionandPublicKeyCheck, HttpMethods
 from . import RasModel, RasUrls
 
 __all__ = ['RASTest']
@@ -13,11 +13,31 @@ class RASTest(VersionandPublicKeyCheck):
     def __init__(self, service, configuration, resources):
         super().__init__(service, configuration, resources)
         self.resources = resources
-
+    
     def run(self):
+        self.rasmodel = RasModel(self.origin, self.resources, self.conf)
+        res = self.rasmodel.get('cloud').json()
+        clouds = res.get('clouds')
+
+        # ms_url
+        membersrequest = FogbowHttpUtil(self.conf['ms_url'])
+        res = membersrequest.get('members').json()
+        members = res.get('members')
+
+        for member in members:
+            for cloudio in clouds:
+                print ('Running tests for member:', member, \
+                    ', at cloud:', cloudio)
+                
+                self.tests_battery(member, cloudio)
+
+    def tests_battery(self, memberid, cloudioname="emulated"):
         try:
             super().run()
-            self.rasmodel = RasModel(self.origin, self.resources, self.conf)
+            FogbowRequest.addsetting('body', {
+                'provider': memberid,
+                'cloudName': cloudioname
+            })
 
             # GET {resource}/status
             images = self.testgetimages()

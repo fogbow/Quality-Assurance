@@ -100,3 +100,10 @@ class RasModel(object):
 
     def genericrequest(self, url, **kwargs):
         return self.__rasrequester__.__execute__(url, **kwargs)
+
+    def setmemberid(self, memberid):
+        self.imageskwargs['memberid'] = memberid
+        
+    def setcloud(self, cloud):
+        self.imageskwargs['cloud'] = cloud
+    

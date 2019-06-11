@@ -125,9 +125,13 @@ class FogbowRequest:
         cls.commonsettings[key] = setting
 
     def execute(self):
+        print("settings:", self.commonsettings)
         verb_requester = getattr(requests, self.method)
 
-        body = { **self.commonsettings, **self.body }
+        body = {**self.body}
+
+        if self.method == HttpMethods.POST:
+            body = { **self.commonsettings, **body }
 
         res = verb_requester(url=self.url, json=body, headers=self.headers)
 
