@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from common import TestEngine, VersionandPublicKeyCheck
+from common import FogbowHttpUtil, VersionandPublicKeyCheck
 
 __all__ = ['AuthTest']
 
@@ -34,7 +34,7 @@ class AuthTest(VersionandPublicKeyCheck):
     def __createtokentest__ (self, message, credentials, assertion):
         self.starttest(message)
 
-        test = TestEngine(self.origin)
+        test = FogbowHttpUtil(self.origin)
         res = test.create('token', body=credentials)
         
         assertion(res.status_code, 400)

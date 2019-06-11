@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from common import TestEngine
+from common import FogbowHttpUtil
 
 __all__ = ['RasModel']
 
@@ -9,7 +9,7 @@ class RasModel(object):
     def __init__(self, origin, resources, conf):
         self.resources = resources
         self.conf = conf
-        self.__rasrequester__ = TestEngine(origin)
+        self.__rasrequester__ = FogbowHttpUtil(origin)
         
         pubkey = self.getpubkey()
         token = self.createtoken(pubkey)
@@ -28,7 +28,7 @@ class RasModel(object):
     def createtoken(self, pubkey):
         
         as_url = self.conf['as_url']
-        asrequester = TestEngine(as_url)
+        asrequester = FogbowHttpUtil(as_url)
 
         credentials = self.resources['auth_credentials']
         credentials['publicKey'] = pubkey
@@ -38,12 +38,9 @@ class RasModel(object):
 
     def getmembers(self):
         ms_url = self.conf['as_url']
-        msrequester = TestEngine(ms_url)
+        msrequester = FogbowHttpUtil(ms_url)
 
-        credentials = self.resources['auth_credentials']
-        credentials['publicKey'] = pubkey
-        
-        res = asrequester.create('token', body=credentials).json()
+        res = msrequester.create('token', body=credentials).json()
         return res['token']
 
     def create(self, resource, **kwargs):

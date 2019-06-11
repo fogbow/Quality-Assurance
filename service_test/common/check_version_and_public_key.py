@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .service_test_instance import ServiceTestInstance
-from .test_factory import TestEngine
+from .fogbow_http_util import FogbowHttpUtil
 from .check_version import VersionCheck
 
 __all__ = ['VersionandPublicKeyCheck']
@@ -15,7 +15,7 @@ class VersionandPublicKeyCheck(VersionCheck):
     def publickey(self):
         self.starttest('Requesting public key')
 
-        test = TestEngine(self.origin)
+        test = FogbowHttpUtil(self.origin)
         res = test.get('public-key').json()
         publickey = res['publicKey']
         

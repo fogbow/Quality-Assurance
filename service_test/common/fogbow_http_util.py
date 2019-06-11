@@ -7,9 +7,9 @@ import time
 from os import path
 from . import HttpMethods, InstanceState
 
-__all__ = ['TestEngine', 'FogbowRequest']
+__all__ = ['FogbowHttpUtil', 'FogbowRequest']
 
-class TestEngine(object):
+class FogbowHttpUtil(object):
     def __init__(self, service_url):
         self.service_url = service_url
         self.body = {}

@@ -3,7 +3,7 @@
 import copy
 import time
 
-from common import TestEngine, VersionandPublicKeyCheck, HttpMethods
+from common import FogbowHttpUtil, VersionandPublicKeyCheck, HttpMethods
 from . import RasModel, RasUrls
 
 __all__ = ['RASTest']

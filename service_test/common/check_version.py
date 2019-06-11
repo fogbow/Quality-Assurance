@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .service_test_instance import ServiceTestInstance
-from .test_factory import TestEngine
+from .fogbow_http_util import FogbowHttpUtil
 
 __all__ = ['VersionCheck']
 
@@ -13,7 +13,7 @@ class VersionCheck(ServiceTestInstance):
     def version(self):
         self.starttest('Requesting version')
 
-        test = TestEngine(self.origin)
+        test = FogbowHttpUtil(self.origin)
         res = test.get('version').json()
         version = res['version']
         

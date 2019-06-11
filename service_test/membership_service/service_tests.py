@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from common import TestEngine, VersionCheck
+from common import FogbowHttpUtil, VersionCheck
 
 __all__ = ['MembersTest']
 
@@ -23,7 +23,7 @@ class MembersTest(VersionCheck):
     def listmembers(self):
         self.starttest('List members')
         
-        test = TestEngine(self.origin)
+        test = FogbowHttpUtil(self.origin)
         res = test.get('members').json()
         members = res['members']
         
