@@ -1,0 +1,8 @@
+{
+	"direction": "IN",
+	"portFrom": 99,
+	"portTo": 3752,
+	"cidr": "0.0.0.0/0",
+	"etherType": "IPv4",
+	"protocol": "TCP"
+}

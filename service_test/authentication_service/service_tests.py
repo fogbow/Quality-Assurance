@@ -1,55 +1,46 @@
 # -*- coding: utf-8 -*-
-import requests
-import shutil
 
-from common import TestSuite, TestEngine
+from common import FogbowHttpUtil, VersionandPublicKeyCheck
 
 __all__ = ['AuthTest']
 
-class AuthTest(TestSuite):
+class AuthTest(VersionandPublicKeyCheck):
 
     def __init__(self, service, configuration, resources):
-        TestSuite.__init__(self, service)
-        self.conf = configuration
-        self.pid = None
-        self.resources = resources
-        self.port = self.conf['application']['port']
-        self.origin = 'http://localhost:' + str(self.port)
-
-    def setup(self):
-        repo_url = self.conf['application']['repo_url']
-        branch = self.conf['application']['branch_under_test']
-
-        self.clonerepo(repo_url, branch)
-
-        command = self.conf['commands']['run_application']
-        port = self.port
-
-        pid = self.run_in_background(command, port)
-
-        print("pid for proccess is %s" % pid)
-        self.setpid(pid)
-
-    def teardown(self):
-        print('tasketeeee')
-        # self.kill_background_process(self.pid)
-        # shutil.rmtree(self.workdir)
+        super().__init__(service, configuration, resources)
 
     def run(self):
-        self.createtoken()
+        try:
+            super().run()
+            self.createtoken()
+            self.failcreatetoken()
+        except Exception as e:
+            self.fail()
+            print("Interruped execution due to runtime error")
+            raise e
+        finally:
+            self.logresults()
 
     def createtoken(self):
-        self.logTest('Creating token')
-        test = TestEngine(self.origin)
-        credentials = self.resources['auth_credentials']
-        res = test.create('token', body=credentials)
-        token = res['token']
-        print('Token %s was obtained' % token)
-        # body = json.lao
+        self.__createtokentest__('Creating token', \
+            self.resources['auth_credentials'], \
+            self.assertlt)
 
-    def setpid(self, pid):
-        self.pid = pid
+    def failcreatetoken(self):
+        self.__createtokentest__('Fail attemp to create token', \
+            self.resources['invalid_auth_credentials'], \
+            self.assertge)
+
+    def __createtokentest__ (self, message, credentials, assertion):
+        self.starttest(message)
+
+        test = FogbowHttpUtil(self.origin)
+        res = test.create('token', body=credentials)
+        
+        assertion(res.status_code, 400)
+        
+        self.endtest()
 
     @classmethod
     def required_resources(self):
-        return ['auth_credentials']
+        return ['auth_credentials', 'invalid_auth_credentials']

@@ -1,0 +1,12 @@
+{
+  "services": [],
+  "application": {
+    "branch_under_test": "develop",
+    "repo_url": "https://github.com/fogbow/authentication-service.git",
+    "port": 8081,
+    "api_endpoint": "http://localhost:8081/as"
+  },
+  "commands": {
+    "run_application": "/usr/bin/mvn spring-boot:run -Dspring.profiles.active=dev"
+  }
+}

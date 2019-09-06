@@ -1,0 +1,12 @@
+{
+  "services": [],
+  "application": {
+    "branch_under_test": "develop",
+    "repo_url": "https://github.com/fogbow/membership-service.git",
+    "port": 8083,
+    "api_endpoint": "http://localhost:8083/ms"
+  },
+  "commands": {
+    "run_application": "/usr/bin/mvn spring-boot:run -Dspring.profiles.active=dev"
+  }
+}

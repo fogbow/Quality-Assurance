@@ -1,0 +1,7 @@
+{
+    "gateway" : "10.10.0.1",
+    "cidr" : "10.10.0.0/24",
+    "allocationMode" : "dynamic",
+    "name": "mock-anderson",
+    "provider": "anderson-member1.lsd.ufcg.edu.br"
+}
